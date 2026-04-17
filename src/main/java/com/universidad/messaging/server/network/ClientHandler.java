@@ -1,49 +1,43 @@
 package com.universidad.messaging.server.network;
 
-import com.universidad.messaging.server.pool.ConnectionPool;
+import com.universidad.messaging.server.pool.ClientConnectionPool;
+import com.universidad.messaging.server.pool.PooledClientConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Worker reutilizable del Object Pool de conexiones.
- * Cada instancia es creada una sola vez por el {@link ConnectionPool} y reciclada
- * tras completar el procesamiento de un cliente TCP.
+ * Worker que procesa una conexión de cliente TCP utilizando una
+ * {@link PooledClientConnection} obtenida del {@link ClientConnectionPool}.
  *
- * <p>Ciclo de vida:
- * <ol>
- *   <li>El pool invoca {@link #assignSocket(Socket)} para inyectar la conexión.</li>
- *   <li>El pool envía esta instancia al {@code ExecutorService} para su ejecución.</li>
- *   <li>Al finalizar ({@code finally}), el handler cierra el socket y se devuelve al pool.</li>
- * </ol>
+ * <p>Relación con el diagrama de clases:
+ * <pre>
+ *   TCPServer --lanza--&gt; ClientHandler --solicita conexión--&gt; ClientConnectionPool
+ * </pre>
+ *
+ * <p><b>PUNTO CRÍTICO ({@code finally}):</b> El bloque {@code finally} de {@link #run()}
+ * invoca obligatoriamente {@link ClientConnectionPool#release(PooledClientConnection)}
+ * para devolver la conexión al pool, garantizando el reciclaje incluso ante excepciones.</p>
  */
 public class ClientHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(ClientHandler.class);
 
-    private final ConnectionPool pool;
-    private volatile Socket socket;
+    private final PooledClientConnection connection;
+    private final ClientConnectionPool pool;
 
     /**
-     * Construye un ClientHandler asociado al pool que lo gestiona.
+     * Construye un ClientHandler para procesar la conexión pooleable indicada.
      *
-     * @param pool referencia al {@link ConnectionPool} para la devolución automática.
+     * @param connection la conexión del cliente adquirida del pool (ya con socket asignado).
+     * @param pool       referencia al pool para la devolución automática en {@code finally}.
      */
-    public ClientHandler(ConnectionPool pool) {
+    public ClientHandler(PooledClientConnection connection, ClientConnectionPool pool) {
+        this.connection = connection;
         this.pool = pool;
-    }
-
-    /**
-     * Inyecta el socket del cliente que será procesado en la próxima ejecución.
-     *
-     * @param socket socket TCP del cliente recién aceptado por el servidor.
-     */
-    public void assignSocket(Socket socket) {
-        this.socket = socket;
     }
 
     /**
@@ -54,67 +48,54 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            if (socket == null || socket.isClosed()) {
+            if (connection.getSocket() == null || connection.getSocket().isClosed()) {
                 logger.warn("ClientHandler ejecutado sin un socket válido asignado.");
                 return;
             }
 
-            logger.info("Procesando conexión del cliente: {}", socket.getRemoteSocketAddress());
+            logger.info("Procesando conexión del cliente: {}",
+                    connection.getSocket().getRemoteSocketAddress());
 
-            // --- Simulación del ciclo de vida de la conexión ---
-            try (InputStream in = socket.getInputStream();
-                 OutputStream out = socket.getOutputStream()) {
+            // Obtener streams desde la conexión pooleable (ya inicializados por setSocket)
+            InputStream in = connection.getInputStream();
+            OutputStream out = connection.getOutputStream();
 
-                // Leer datos del cliente (simulación básica)
-                byte[] buffer = new byte[4096];
-                int bytesRead = in.read(buffer);
-
-                if (bytesRead > 0) {
-                    String received = new String(buffer, 0, bytesRead, StandardCharsets.UTF_8);
-                    logger.debug("Datos recibidos del cliente {}: {}", socket.getRemoteSocketAddress(), received);
-
-                    // Respuesta de confirmación (placeholder para lógica de negocio futura)
-                    String response = "{\"status\": \"ok\", \"message\": \"Mensaje recibido.\"}";
-                    out.write(response.getBytes(StandardCharsets.UTF_8));
-                    out.flush();
-                    logger.debug("Respuesta enviada al cliente {}.", socket.getRemoteSocketAddress());
-                } else {
-                    logger.debug("Cliente {} cerró la conexión sin enviar datos.", socket.getRemoteSocketAddress());
-                }
+            if (in == null || out == null) {
+                logger.error("Streams no inicializados en la conexión pooleable.");
+                return;
             }
 
-            logger.info("Procesamiento finalizado para el cliente: {}", socket.getRemoteSocketAddress());
+            // --- Simulación del ciclo de vida de la conexión ---
+            byte[] buffer = new byte[4096];
+            int bytesRead = in.read(buffer);
+
+            if (bytesRead > 0) {
+                String received = new String(buffer, 0, bytesRead, StandardCharsets.UTF_8);
+                logger.debug("Datos recibidos del cliente {}: {}",
+                        connection.getSocket().getRemoteSocketAddress(), received);
+
+                // Respuesta de confirmación (placeholder para lógica de negocio futura)
+                String response = "{\"status\": \"ok\", \"message\": \"Mensaje recibido.\"}";
+                out.write(response.getBytes(StandardCharsets.UTF_8));
+                out.flush();
+                logger.debug("Respuesta enviada al cliente {}.",
+                        connection.getSocket().getRemoteSocketAddress());
+            } else {
+                logger.debug("Cliente {} cerró la conexión sin enviar datos.",
+                        connection.getSocket().getRemoteSocketAddress());
+            }
+
+            logger.info("Procesamiento finalizado para el cliente: {}",
+                    connection.getSocket().getRemoteSocketAddress());
 
         } catch (IOException e) {
             logger.error("Error de I/O procesando al cliente.", e);
         } catch (Exception e) {
             logger.error("Error inesperado en ClientHandler.", e);
         } finally {
-            // CRÍTICO: Cerrar el socket y devolver este handler al pool SIEMPRE
-            closeSocket();
-            pool.release(this);
-            logger.debug("ClientHandler devuelto al pool de conexiones.");
+            // CRÍTICO: Devolver la conexión al pool SIEMPRE (reset + requeue)
+            pool.release(connection);
+            logger.debug("Conexión devuelta al pool de conexiones.");
         }
-    }
-
-    /**
-     * Cierra el socket del cliente de forma segura.
-     */
-    private void closeSocket() {
-        if (socket != null && !socket.isClosed()) {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                logger.error("Error al cerrar el socket del cliente.", e);
-            }
-        }
-    }
-
-    /**
-     * Limpia el estado interno del handler para su reutilización.
-     * Invocado por el pool al reciclar la instancia.
-     */
-    public void resetState() {
-        this.socket = null;
     }
 }

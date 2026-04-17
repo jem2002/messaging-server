@@ -2,7 +2,7 @@ package com.universidad.messaging.server;
 
 import com.universidad.messaging.server.network.TCPServer;
 import com.universidad.messaging.server.network.UDPServer;
-import com.universidad.messaging.server.pool.ConnectionPool;
+import com.universidad.messaging.server.pool.ClientConnectionPool;
 import com.universidad.messaging.server.repository.pool.DatabaseConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,9 +44,9 @@ public class ServerMain {
             System.exit(1);
         }
 
-        // 4. Inicializar el ConnectionPool (Object Pool patrón para sockets de clientes)
+        // 4. Inicializar el ClientConnectionPool (Object Pool patrón para sockets de clientes)
         int maxPoolSize = Integer.parseInt(config.getProperty("server.pool.size", "100"));
-        ConnectionPool connectionPool = new ConnectionPool(maxPoolSize);
+        ClientConnectionPool connectionPool = new ClientConnectionPool(maxPoolSize);
         logger.info("Pool de conexiones inicializado con tamaño máximo: {}", maxPoolSize);
 
         // 5. Instanciar y arrancar el TCPServer o UDPServer
@@ -79,7 +79,7 @@ public class ServerMain {
             // Apagar procesadores de requests (pool de sockets)
             if (connectionPool != null) {
                 connectionPool.shutdown();
-                logger.info("ConnectionPool detenido.");
+                logger.info("ClientConnectionPool detenido.");
             }
             
             // Cerrar la conexión a base de datos de forma limpia

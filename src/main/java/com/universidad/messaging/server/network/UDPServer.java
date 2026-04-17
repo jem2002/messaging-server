@@ -1,6 +1,6 @@
 package com.universidad.messaging.server.network;
 
-import com.universidad.messaging.server.pool.ConnectionPool;
+import com.universidad.messaging.server.pool.ClientConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,14 +12,14 @@ import java.net.SocketException;
 public class UDPServer implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(UDPServer.class);
     private final int port;
-    private final ConnectionPool connectionPool;
+    private final ClientConnectionPool connectionPool;
     private DatagramSocket datagramSocket;
     private volatile boolean running = false;
     
     // PUNTO CRÍTICO: Tamaño máximo permitido de payload para UDP según los estándares con IPv4 (65535 - 8(UDP) - 20(IP)) = 65507 bytes
     private static final int MAX_BUFFER_SIZE = 65507;
 
-    public UDPServer(int port, ConnectionPool connectionPool) {
+    public UDPServer(int port, ClientConnectionPool connectionPool) {
         this.port = port;
         this.connectionPool = connectionPool;
     }

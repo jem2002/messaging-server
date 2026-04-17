@@ -2,6 +2,9 @@ C:\Users\joshu\Documents\SW2\Cliente_Servidor\messaging-server\src\main\java\com
 C:\Users\joshu\Documents\SW2\Cliente_Servidor\messaging-server\src\main\java\com\universidad\messaging\server\network\ClientHandler.java
 C:\Users\joshu\Documents\SW2\Cliente_Servidor\messaging-server\src\main\java\com\universidad\messaging\server\network\TCPServer.java
 C:\Users\joshu\Documents\SW2\Cliente_Servidor\messaging-server\src\main\java\com\universidad\messaging\server\network\UDPServer.java
-C:\Users\joshu\Documents\SW2\Cliente_Servidor\messaging-server\src\main\java\com\universidad\messaging\server\pool\ConnectionPool.java
+C:\Users\joshu\Documents\SW2\Cliente_Servidor\messaging-server\src\main\java\com\universidad\messaging\server\pool\ClientConnectionPool.java
+C:\Users\joshu\Documents\SW2\Cliente_Servidor\messaging-server\src\main\java\com\universidad\messaging\server\pool\ObjectPool.java
+C:\Users\joshu\Documents\SW2\Cliente_Servidor\messaging-server\src\main\java\com\universidad\messaging\server\pool\Poolable.java
+C:\Users\joshu\Documents\SW2\Cliente_Servidor\messaging-server\src\main\java\com\universidad\messaging\server\pool\PooledClientConnection.java
 C:\Users\joshu\Documents\SW2\Cliente_Servidor\messaging-server\src\main\java\com\universidad\messaging\server\repository\pool\DatabaseConnectionManager.java
 C:\Users\joshu\Documents\SW2\Cliente_Servidor\messaging-server\src\main\java\com\universidad\messaging\server\ServerMain.java

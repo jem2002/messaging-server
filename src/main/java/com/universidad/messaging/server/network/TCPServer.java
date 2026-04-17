@@ -1,6 +1,7 @@
 package com.universidad.messaging.server.network;
 
-import com.universidad.messaging.server.pool.ConnectionPool;
+import com.universidad.messaging.server.pool.ClientConnectionPool;
+import com.universidad.messaging.server.pool.PooledClientConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,11 +14,11 @@ import java.nio.charset.StandardCharsets;
 public class TCPServer implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(TCPServer.class);
     private final int port;
-    private final ConnectionPool connectionPool;
+    private final ClientConnectionPool connectionPool;
     private ServerSocket serverSocket;
     private volatile boolean running = false;
 
-    public TCPServer(int port, ConnectionPool connectionPool) {
+    public TCPServer(int port, ClientConnectionPool connectionPool) {
         this.port = port;
         this.connectionPool = connectionPool;
     }
@@ -50,15 +51,23 @@ public class TCPServer implements Runnable {
                     Socket clientSocket = serverSocket.accept();
                     logger.debug("Nueva conexión TCP entrante desde {}", clientSocket.getRemoteSocketAddress());
                     
-                    // Intento de adquirir un handler del pool antes de usarlo. Si es null, está lleno.
-                    ClientHandler handler = connectionPool.acquire(clientSocket);
+                    // 1. Adquirir una conexión pooleable (fail-fast, no bloqueante)
+                    PooledClientConnection connection = connectionPool.acquire();
                     
-                    if (handler == null) {
+                    if (connection == null) {
+                        // Pool agotado → rechazar con JSON de error
                         logger.warn("Pool de conexiones lleno. Rechazando conexión de {}", clientSocket.getRemoteSocketAddress());
                         rejectConnection(clientSocket);
                     } else {
-                        // El connectionTask es gestionado internamente por el pool de conexiones
-                        logger.debug("Conexión aceptada y encolada en el ConnectionPool.");
+                        // 2. Inyectar el socket TCP en la conexión pooleable
+                        connection.setSocket(clientSocket);
+                        
+                        // 3. Crear el worker y lanzarlo en el ExecutorService del pool
+                        ClientHandler handler = new ClientHandler(connection, connectionPool);
+                        connectionPool.submit(handler);
+                        
+                        logger.debug("Conexión aceptada y despachada. Pool disponible: {} | Activas: {}",
+                                connectionPool.getPoolSize(), connectionPool.getActiveCount());
                     }
                 } catch (IOException e) {
                     if (running) {
