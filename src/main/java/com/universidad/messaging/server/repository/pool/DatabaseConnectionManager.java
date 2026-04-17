@@ -81,6 +81,17 @@ public class DatabaseConnectionManager {
     }
 
     /**
+     * Cierra el pool de conexiones HikariCP de forma segura.
+     * Debe ser invocado durante el apagado ordenado (Graceful Shutdown)
+     * para liberar todos los recursos JDBC subyacentes.
+     */
+    public void close() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            dataSource.close();
+        }
+    }
+
+    /**
      * Carga el archivo de propiedades de configuración "config.properties" desde el classpath.
      *
      * @return Un objeto {@link Properties} con los valores cargados.
