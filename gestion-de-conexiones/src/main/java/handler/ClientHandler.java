@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pool.IConnectionPool;
 import pool.PooledClientConnection;
-
+import UserService.UserManager;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -32,29 +32,26 @@ public class ClientHandler implements Runnable {
             InputStream in = connection.getInputStream();
             OutputStream out = connection.getOutputStream();
 
-            // 1. Leer los datos crudos del socket (Para este prototipo leemos un chunk inicial)
             byte[] buffer = new byte[4096];
-            int bytesRead = in.read(buffer);
+            int bytesRead;
 
-            if (bytesRead > 0) {
+            // Bucle que mantiene viva la conexión hasta que el cliente hace Ctrl+C (devuelve -1)
+            while ((bytesRead = in.read(buffer)) != -1) {
                 String rawJson = new String(buffer, 0, bytesRead, StandardCharsets.UTF_8).trim();
-                logger.debug("Datos recibidos de {}: {}", clientIp, rawJson);
 
-                // 2. ENVIAR AL PROTOCOLO (Traductor/Negocio)
                 String jsonResponse = router.routeRequest(rawJson, clientIp);
 
-                // 3. Enviar respuesta de vuelta al cliente
                 out.write(jsonResponse.getBytes(StandardCharsets.UTF_8));
-                out.write('\n'); // Delimitador de fin de línea
+                out.write('\n');
                 out.flush();
-
-                logger.debug("Respuesta enviada a {}: {}", clientIp, jsonResponse);
             }
+            logger.info("El cliente {} ha cerrado la conexión educadamente.", clientIp);
 
         } catch (Exception e) {
-            logger.error("Error en la comunicación con el cliente {}", clientIp, e);
+            logger.error("Conexión perdida abruptamente con {} (Ej: Ctrl+C)", clientIp);
         } finally {
-            // 4. CRÍTICO: Devolver la conexión al pool siempre, pase lo que pase
+            // OPERACIÓN DE LIMPIEZA CRÍTICA: Avisar al router y liberar el recurso
+            router.notificarDesconexionFisica(clientIp);
             pool.release(connection);
             logger.info("Conexión de {} liberada y reciclada.", clientIp);
         }

@@ -181,4 +181,21 @@ public class MySqlDao {
             return rs.next() ? rs.getLong(1) : -1;
         }
     }
+    public void cerrarSesionActiva(long sessionId) throws SQLException {
+        String sql = "UPDATE client_connections SET is_active = FALSE, disconnected_at = NOW() WHERE id = ?";
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, sessionId);
+            stmt.executeUpdate();
+        }
+    }
+    public void cerrarSesionPorIpYPuerto(String ipAddress, int port) throws Exception {
+        String sql = "UPDATE client_connections SET is_active = FALSE, disconnected_at = NOW() WHERE ip_address = ? AND port = ? AND is_active = TRUE";
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, ipAddress);
+            stmt.setInt(2, port);
+            stmt.executeUpdate();
+        }
+    }
 }

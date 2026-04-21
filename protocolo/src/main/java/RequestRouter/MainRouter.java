@@ -82,4 +82,21 @@ public class MainRouter {
 
         return serializer.buildSuccessResponse(JsonSchema.ACTION_CONNECT, "Usuario ID: " + userId);
     }
+    // Añade este método al final de tu clase MainRouter
+    public void notificarDesconexionFisica(String rawClientIp) {
+        try {
+            String cleanIp = rawClientIp.replace("/", "");
+            String ipAddress = cleanIp;
+            int port = 0;
+            if (cleanIp.contains(":")) {
+                String[] parts = cleanIp.split(":");
+                ipAddress = parts[0];
+                port = Integer.parseInt(parts[1]);
+            }
+            // Llamar al servicio
+            userManager.desconectarPorCaidaDeRed(ipAddress, port);
+        } catch (Exception e) {
+            logger.error("Error procesando desconexión física", e);
+        }
+    }
 }
