@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="red" />
+        <module name="protocolo" />
+        <module name="servicios" />
+        <module name="gestion-de-conexiones" />
+        <module name="persistencia" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>
