@@ -1,0 +1,1 @@
+Este es un archivo confidencial que debe ser encriptado y hasheado correctamente por el DocumentManager.

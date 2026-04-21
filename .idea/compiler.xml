@@ -9,6 +9,7 @@
         <module name="red" />
         <module name="protocolo" />
         <module name="servicios" />
+        <module name="shared" />
         <module name="gestion-de-conexiones" />
         <module name="persistencia" />
       </profile>
