@@ -1,5 +1,6 @@
 package RequestRouter;
 import JsonSchema.JsonSchema;
+import LogService.LogManager;
 import DocumentService.DocumentManager;
 import JsonSerializer.ResponseBuilder;
 import MessageParser.JsonInputParser;
@@ -17,11 +18,18 @@ public class MainRouter {
     private final UserManager userManager;
     private final DocumentManager documentManager;
 
-    public MainRouter(UserManager userManager, DocumentManager documentManager) {
+    // 1. AGREGAR EL ATRIBUTO
+    private final LogManager logManager;
+
+    // 2. PEDIRLO EN EL CONSTRUCTOR
+    public MainRouter(UserManager userManager, DocumentManager documentManager, LogManager logManager) {
         this.parser = new JsonInputParser();
         this.serializer = new ResponseBuilder();
         this.userManager = userManager;
         this.documentManager = documentManager;
+
+        // 3. INICIALIZARLO
+        this.logManager = logManager;
     }
 
     public String routeRequest(String rawJson, String clientIp) {
@@ -47,15 +55,30 @@ public class MainRouter {
         }
     }
 
-    private String handleConnect(JsonNode payload, String clientIp) throws Exception {
+    private String handleConnect(JsonNode payload, String rawClientIp) throws Exception {
         if (payload == null || !payload.has(JsonSchema.PAYLOAD_USERNAME)) {
             return serializer.buildErrorResponse("Falta el username.");
         }
 
-        // Extracción de datos con Jackson
         String username = payload.get(JsonSchema.PAYLOAD_USERNAME).asText();
 
-        long userId = userManager.conectarUsuario(username, clientIp);
+        // --- LIMPIEZA DE IP Y PUERTO ---
+        String cleanIp = rawClientIp.replace("/", ""); // Quitamos el '/'
+        String ipAddress = cleanIp;
+        int port = 0;
+
+        if (cleanIp.contains(":")) {
+            String[] parts = cleanIp.split(":");
+            ipAddress = parts[0];
+            port = Integer.parseInt(parts[1]); // Extraemos el 47124
+        }
+        // -------------------------------
+
+        // Ejecutar lógica de negocio con los datos separados
+        long userId = userManager.conectarUsuario(username, ipAddress, port);
+
+        // Registrar Log
+        logManager.registrarAccion(null, userId, "CONNECT", "SUCCESS", "Usuario conectado desde " + ipAddress + ":" + port);
 
         return serializer.buildSuccessResponse(JsonSchema.ACTION_CONNECT, "Usuario ID: " + userId);
     }

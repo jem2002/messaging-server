@@ -11,6 +11,7 @@
         <module name="servicios" />
         <module name="shared" />
         <module name="gestion-de-conexiones" />
+        <module name="main" />
         <module name="persistencia" />
       </profile>
     </annotationProcessing>

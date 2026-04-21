@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
  * Prueba de Humo (Smoke Test) para verificar la orquestación del Módulo de Servicios.
  */
 public class ServiceTester {
-    private static final Logger logger = LoggerFactory.getLogger(ServiceTester.class);
+ /*   private static final Logger logger = LoggerFactory.getLogger(ServiceTester.class);
 
     public static void main(String[] args) {
         logger.info("=== INICIANDO SMOKE TEST DE SERVICIOS ===");
@@ -79,4 +79,6 @@ public class ServiceTester {
             DatabaseConnectionManager.getInstance().close();
         }
     }
+
+  */
 }

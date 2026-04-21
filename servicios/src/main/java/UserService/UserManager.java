@@ -9,7 +9,13 @@ public class UserManager {
         this.dao = dao;
     }
 
-    public long conectarUsuario(String username, String ipAddress) throws Exception {
-        return dao.obtenerORegistrarUsuario(username, ipAddress);
+    public long conectarUsuario(String username, String ipAddress, int port) throws Exception {
+        // 1. Obtener o crear el usuario
+        long userId = dao.obtenerORegistrarUsuario(username, ipAddress);
+
+        // 2. Registrar la sesión pasando el puerto
+        dao.registrarSesionActiva(userId, ipAddress, port, "TCP");
+
+        return userId;
     }
 }

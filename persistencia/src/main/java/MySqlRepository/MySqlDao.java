@@ -144,4 +144,41 @@ public class MySqlDao {
         }
         return documentos;
     }
+    public List<Map<String, String>> listarUsuariosRegistrados() throws SQLException {
+        List<Map<String, String>> usuarios = new ArrayList<>();
+        String sql = "SELECT id, username, ip_address, created_at FROM users ORDER BY id ASC";
+
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Map<String, String> user = new HashMap<>();
+                user.put("id", String.valueOf(rs.getLong("id")));
+                user.put("username", rs.getString("username"));
+                user.put("ip", rs.getString("ip_address"));
+                user.put("fecha", rs.getString("created_at"));
+                usuarios.add(user);
+            }
+        }
+        return usuarios;
+    }
+
+    public long registrarSesionActiva(long userId, String ipAddress, int port, String protocol) throws SQLException {
+        // Agregamos 'port' a la consulta
+        String sql = "INSERT INTO client_connections (user_id, ip_address, port, protocol, is_active, connected_at) VALUES (?, ?, ?, ?, TRUE, NOW())";
+
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setLong(1, userId);
+            stmt.setString(2, ipAddress);
+            stmt.setInt(3, port);         // Insertamos el puerto
+            stmt.setString(4, protocol);
+            stmt.executeUpdate();
+
+            ResultSet rs = stmt.getGeneratedKeys();
+            return rs.next() ? rs.getLong(1) : -1;
+        }
+    }
 }

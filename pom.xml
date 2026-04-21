@@ -15,6 +15,7 @@
         <module>servicios</module>
         <module>persistencia</module>
         <module>shared</module>
+        <module>main</module>
     </modules>
 
     <properties>

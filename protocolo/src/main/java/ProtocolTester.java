@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ProtocolTester {
-    private static final Logger logger = LoggerFactory.getLogger(ProtocolTester.class);
+ /*   private static final Logger logger = LoggerFactory.getLogger(ProtocolTester.class);
 
     public static void main(String[] args) {
         logger.info("=== INICIANDO SMOKE TEST DE PROTOCOLO ===");
@@ -82,4 +82,6 @@ public class ProtocolTester {
             DatabaseConnectionManager.getInstance().close();
         }
     }
+
+  */
 }

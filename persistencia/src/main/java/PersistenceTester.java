@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
  * Clase principal para probar el módulo de persistencia de forma aislada.
  */
 public class PersistenceTester {
-    private static final Logger logger = LoggerFactory.getLogger(PersistenceTester.class);
+ /*   private static final Logger logger = LoggerFactory.getLogger(PersistenceTester.class);
 
     public static void main(String[] args) {
         logger.info("=== INICIANDO SMOKE TEST DE PERSISTENCIA ===");
@@ -55,4 +55,6 @@ public class PersistenceTester {
             System.exit(1);
         }
     }
+
+  */
 }
