@@ -16,7 +16,6 @@
         <module>persistencia</module>
         <module>shared</module>
         <module>main</module>
-        <module>cliente-mensajeria</module>
     </modules>
 
     <properties>
