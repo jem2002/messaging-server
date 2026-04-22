@@ -198,4 +198,38 @@ public class MySqlDao {
             stmt.executeUpdate();
         }
     }
+    public List<Map<String, String>> listarClientesActivos() throws Exception {
+        List<Map<String, String>> activos = new ArrayList<>();
+        // JOIN entre usuarios y sus conexiones activas
+        String sql = "SELECT u.username, c.ip_address, c.connected_at " +
+                "FROM users u " +
+                "JOIN client_connections c ON u.id = c.user_id " +
+                "WHERE c.is_active = TRUE";
+
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Map<String, String> client = new HashMap<>();
+                client.put("username", rs.getString("username"));
+                client.put("ip", rs.getString("ip_address"));
+                client.put("fecha_inicio", rs.getString("connected_at"));
+                activos.add(client);
+            }
+        }
+        return activos;
+    }
+    public void limpiarConexionesMuertas() {
+        String sql = "UPDATE client_connections SET is_active = FALSE, disconnected_at = NOW() WHERE is_active = TRUE";
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            int limpiados = stmt.executeUpdate();
+            if (limpiados > 0) {
+                logger.info("Limpieza de inicio: {} conexiones 'muertas' fueron cerradas.", limpiados);
+            }
+        } catch (SQLException e) {
+            logger.error("Error limpiando conexiones muertas", e);
+        }
+    }
 }

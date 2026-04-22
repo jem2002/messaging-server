@@ -15,7 +15,8 @@ public final class JsonSchema {
     public static final String ACTION_ERROR = "ERROR";
 
     // Aquí agregaremos luego las demás (LIST_CLIENTS, SEND_DOC, etc.)
-
+// Añade esto debajo de ACTION_CONNECT
+    public static final String ACTION_LIST_CLIENTS = "LIST_CLIENTS";
     // --- Llaves permitidas dentro del 'payload' ---
     public static final String PAYLOAD_USERNAME = "username";
     public static final String PAYLOAD_REASON = "reason";

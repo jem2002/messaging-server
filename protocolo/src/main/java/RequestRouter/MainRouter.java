@@ -10,6 +10,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.Map;
+
 public class MainRouter {
     private static final Logger logger = LoggerFactory.getLogger(MainRouter.class);
 
@@ -43,7 +46,8 @@ public class MainRouter {
             switch (request.getAction()) {
                 case JsonSchema.ACTION_CONNECT:
                     return handleConnect(request.getPayload(), clientIp);
-
+                case JsonSchema.ACTION_LIST_CLIENTS: // <--- NUEVO CASO
+                    return handleListClients();
                 // Futuros endpoints irán aquí
 
                 default:
@@ -81,6 +85,11 @@ public class MainRouter {
         logManager.registrarAccion(null, userId, "CONNECT", "SUCCESS", "Usuario conectado desde " + ipAddress + ":" + port);
 
         return serializer.buildSuccessResponse(JsonSchema.ACTION_CONNECT, "Usuario ID: " + userId);
+    }
+
+    private String handleListClients() {
+        List<Map<String, String>> activos = userManager.obtenerClientesActivos();
+        return serializer.buildListResponse(JsonSchema.ACTION_LIST_CLIENTS, activos, "clientes");
     }
     // Añade este método al final de tu clase MainRouter
     public void notificarDesconexionFisica(String rawClientIp) {

@@ -1,7 +1,11 @@
 package JsonSerializer;
 import JsonSchema.JsonSchema;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.List;
+import java.util.Map;
 
 
 public class ResponseBuilder {
@@ -34,6 +38,24 @@ public class ResponseBuilder {
 
         root.set(JsonSchema.KEY_PAYLOAD, payload);
 
+        return root.toString();
+    }
+    public String buildListResponse(String action, List<Map<String, String>> items, String listName) {
+        ObjectNode root = mapper.createObjectNode();
+        root.put(JsonSchema.KEY_ACTION, action + "_ACK");
+
+        ObjectNode payload = mapper.createObjectNode();
+        payload.put("status", "SUCCESS");
+
+        // Crear un Array JSON dinámico
+        ArrayNode arrayNode = payload.putArray(listName);
+        for (Map<String, String> item : items) {
+            ObjectNode itemNode = mapper.createObjectNode();
+            item.forEach(itemNode::put); // Transfiere el mapa al nodo JSON
+            arrayNode.add(itemNode);
+        }
+
+        root.set(JsonSchema.KEY_PAYLOAD, payload);
         return root.toString();
     }
 }

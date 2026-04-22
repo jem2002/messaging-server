@@ -28,6 +28,7 @@ public class ServerApplication {
             // 2. Módulo Persistencia
           //  DatabaseInitializer.initializeSchema();
             MySqlDao dao = new MySqlDao();
+            dao.limpiarConexionesMuertas();
 
             // 3. Módulo Servicios
             UserManager userManager = new UserManager(dao);
