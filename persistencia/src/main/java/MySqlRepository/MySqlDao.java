@@ -122,11 +122,14 @@ public class MySqlDao {
         }
     }
 
-    public List<Map<String, String>> listarDocumentosDisponibles() throws SQLException {
+    public List<Map<String, String>> listarDocumentosDisponibles() throws Exception {
         List<Map<String, String>> documentos = new ArrayList<>();
-        String sql = "SELECT d.id, d.name, d.size_bytes, d.extension, u.username as owner " +
-                "FROM documents d INNER JOIN users u ON d.owner_user_id = u.id " +
-                "ORDER BY d.created_at DESC";
+
+        // Consulta exacta basada en tu schema.sql
+        String sql = "SELECT d.id, d.name, d.size_bytes, d.extension, u.username, u.ip_address " +
+                "FROM documents d " +
+                "JOIN users u ON d.owner_user_id = u.id " +
+                "ORDER BY d.id DESC";
 
         try (Connection conn = dbManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -135,15 +138,22 @@ public class MySqlDao {
             while (rs.next()) {
                 Map<String, String> doc = new HashMap<>();
                 doc.put("id", String.valueOf(rs.getLong("id")));
+
+                // Usando los nombres reales de las columnas de tu DB
                 doc.put("nombre", rs.getString("name"));
-                doc.put("tamaño", String.valueOf(rs.getLong("size_bytes")));
+                doc.put("tamano_bytes", String.valueOf(rs.getLong("size_bytes")));
                 doc.put("extension", rs.getString("extension"));
-                doc.put("propietario", rs.getString("owner"));
+
+                // Formateamos el propietario como pediste: Nombre (IP)
+                String propietario = rs.getString("username") + " (" + rs.getString("ip_address") + ")";
+                doc.put("propietario", propietario);
+
                 documentos.add(doc);
             }
         }
         return documentos;
     }
+
     public List<Map<String, String>> listarUsuariosRegistrados() throws SQLException {
         List<Map<String, String>> usuarios = new ArrayList<>();
         String sql = "SELECT id, username, ip_address, created_at FROM users ORDER BY id ASC";
@@ -232,4 +242,6 @@ public class MySqlDao {
             logger.error("Error limpiando conexiones muertas", e);
         }
     }
+
+
 }

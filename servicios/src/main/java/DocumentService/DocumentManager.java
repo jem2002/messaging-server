@@ -8,6 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class DocumentManager {
     private static final Logger logger = LoggerFactory.getLogger(DocumentManager.class);
@@ -23,7 +26,16 @@ public class DocumentManager {
         this.dao = dao;
         this.logManager = logManager;
     }
+// Asegúrate de tener el import de List, Map y ArrayList arriba
 
+    public List<Map<String, String>> obtenerDocumentosDisponibles() {
+        try {
+            return dao.listarDocumentosDisponibles();
+        } catch (Exception e) {
+            logger.error("Error al obtener la lista de documentos de la BD", e);
+            return new ArrayList<>(); // Retorna lista vacía en vez de romper el servidor
+        }
+    }
     public boolean procesarRecepcionDocumento(InputStream redStream, String nombre, long sizeBytes,
                                               String extension, String mimeType, long ownerUserId, String ownerIp) {
         Long docId = null;

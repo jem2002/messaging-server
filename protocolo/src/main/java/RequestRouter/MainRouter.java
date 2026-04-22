@@ -47,6 +47,8 @@ public class MainRouter {
                 case JsonSchema.ACTION_LIST_CLIENTS:
                     return handleListClients();
                 // Futuros endpoints irán aquí
+                case JsonSchema.ACTION_LIST_DOCUMENTS:
+                    return handleListDocuments();
                 default:
                     return serializer.buildErrorResponse("Acción no soportada.");
             }
@@ -114,5 +116,11 @@ public class MainRouter {
         } catch (Exception e) {
             logger.error("Error procesando desconexión física", e);
         }
+    }
+
+    private String handleListDocuments() {
+        List<Map<String, String>> docs = documentManager.obtenerDocumentosDisponibles();
+        // Usamos el mismo método del serializador, pero le pasamos la lista de docs y le llamamos "documentos"
+        return serializer.buildListResponse(JsonSchema.ACTION_LIST_DOCUMENTS, docs, "documentos");
     }
 }
