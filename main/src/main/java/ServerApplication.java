@@ -2,6 +2,7 @@ import CryptoService.CryptoManager;
 import DocumentService.DocumentManager;
 import FileStorageService.StorageManager;
 import LogService.LogManager;
+import MessageParser.BroadcastManager;
 import MySqlRepository.DatabaseInitializer;
 import MySqlRepository.MySqlDao;
 import RequestRouter.MainRouter;
@@ -36,9 +37,9 @@ public class ServerApplication {
             CryptoManager cryptoManager = new CryptoManager();
             LogManager logManager = new LogManager(dao);
             DocumentManager documentManager = new DocumentManager(storageManager, cryptoManager, dao, logManager);
-
+            BroadcastManager broadcastManager = new BroadcastManager();
             // 4. Módulo Protocolo
-            MainRouter router = new MainRouter(userManager, documentManager, logManager);
+            MainRouter router = new MainRouter(userManager, documentManager, logManager,broadcastManager);
 
             // 5. Módulo Gestión de Conexiones
             int maxConnections = config.getMaxConnections();
@@ -52,7 +53,8 @@ public class ServerApplication {
                     config.getPort(),
                     pool,
                     threadPool,
-                    router
+                    router,
+                    broadcastManager
             );
 
             // 7. Interfaces Expuestas y Consola Administrativa

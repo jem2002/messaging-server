@@ -8,6 +8,7 @@ import UserService.UserManager;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import MessageParser.BroadcastManager;
 
 public class ClientHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(ClientHandler.class);
@@ -15,22 +16,28 @@ public class ClientHandler implements Runnable {
     private final PooledClientConnection connection;
     private final IConnectionPool pool;
     private final MainRouter router;
+    private final BroadcastManager broadcastManager;
 
-    public ClientHandler(PooledClientConnection connection, IConnectionPool pool, MainRouter router) {
+    public ClientHandler(PooledClientConnection connection, IConnectionPool pool, MainRouter router, BroadcastManager broadcastManager) {
         this.connection = connection;
         this.pool = pool;
         this.router = router;
+        this.broadcastManager = broadcastManager;
     }
 
     @Override
     public void run() {
         String clientIp = "UNKNOWN";
+        OutputStream out = null; // 1. Declarar afuera en null
+
         try {
             clientIp = connection.getSocket().getRemoteSocketAddress().toString();
             logger.info("Atendiendo cliente desde {}", clientIp);
 
             InputStream in = connection.getInputStream();
-            OutputStream out = connection.getOutputStream();
+            out = connection.getOutputStream(); // 2. Asignar adentro del try
+
+            broadcastManager.addStream(out);
 
             byte[] buffer = new byte[4096];
             int bytesRead;
@@ -50,8 +57,10 @@ public class ClientHandler implements Runnable {
         } catch (Exception e) {
             logger.error("Conexión perdida abruptamente con {} (Ej: Ctrl+C)", clientIp);
         } finally {
-            // OPERACIÓN DE LIMPIEZA CRÍTICA: Avisar al router y liberar el recurso
             router.notificarDesconexionFisica(clientIp);
+            if (out != null) {
+                broadcastManager.removeStream(out); // Quitamos el cable del megáfono
+            }
             pool.release(connection);
             logger.info("Conexión de {} liberada y reciclada.", clientIp);
         }

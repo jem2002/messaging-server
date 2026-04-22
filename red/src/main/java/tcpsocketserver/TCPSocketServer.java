@@ -1,5 +1,6 @@
 package tcpsocketserver;
 
+import MessageParser.BroadcastManager;
 import RequestRouter.MainRouter;
 import executor.ThreadPoolManager;
 import handler.ClientHandler;
@@ -21,13 +22,15 @@ public class TCPSocketServer implements Runnable {
     private final MainRouter router;
     private volatile boolean running;
     private ServerSocket serverSocket;
+    private final BroadcastManager broadcastManager;
 
-    public TCPSocketServer(int port, IConnectionPool pool, ThreadPoolManager threadPool, MainRouter router) {
+    public TCPSocketServer(int port, IConnectionPool pool, ThreadPoolManager threadPool, MainRouter router, BroadcastManager broadcastManager) {
         this.port = port;
         this.pool = pool;
         this.threadPool = threadPool;
         this.router = router;
         this.running = true;
+        this.broadcastManager = broadcastManager;
     }
 
     public void stopServer() {
@@ -63,7 +66,7 @@ public class TCPSocketServer implements Runnable {
 
                 // 3. Configurar el socket y delegar al Handler en el ThreadPool
                 pooledConnection.setSocket(clientSocket);
-                ClientHandler handler = new ClientHandler(pooledConnection, pool, router);
+                ClientHandler handler = new ClientHandler(pooledConnection, pool, router, this.broadcastManager);
                 threadPool.execute(handler);
             }
         } catch (IOException e) {

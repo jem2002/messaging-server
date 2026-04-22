@@ -3,6 +3,7 @@ import JsonSchema.JsonSchema;
 import LogService.LogManager;
 import DocumentService.DocumentManager;
 import JsonSerializer.ResponseBuilder;
+import MessageParser.BroadcastManager;
 import MessageParser.JsonInputParser;
 import MessageParser.MessageWrapper;
 import UserService.UserManager;
@@ -20,18 +21,15 @@ public class MainRouter {
     private final ResponseBuilder serializer;
     private final UserManager userManager;
     private final DocumentManager documentManager;
-
-    // 1. AGREGAR EL ATRIBUTO
+    private final BroadcastManager broadcastManager;
     private final LogManager logManager;
 
-    // 2. PEDIRLO EN EL CONSTRUCTOR
-    public MainRouter(UserManager userManager, DocumentManager documentManager, LogManager logManager) {
+    public MainRouter(UserManager userManager, DocumentManager documentManager, LogManager logManager, BroadcastManager broadcastManager) {
         this.parser = new JsonInputParser();
         this.serializer = new ResponseBuilder();
         this.userManager = userManager;
         this.documentManager = documentManager;
-
-        // 3. INICIALIZARLO
+        this.broadcastManager = broadcastManager;
         this.logManager = logManager;
     }
 
@@ -46,10 +44,9 @@ public class MainRouter {
             switch (request.getAction()) {
                 case JsonSchema.ACTION_CONNECT:
                     return handleConnect(request.getPayload(), clientIp);
-                case JsonSchema.ACTION_LIST_CLIENTS: // <--- NUEVO CASO
+                case JsonSchema.ACTION_LIST_CLIENTS:
                     return handleListClients();
                 // Futuros endpoints irán aquí
-
                 default:
                     return serializer.buildErrorResponse("Acción no soportada.");
             }
@@ -67,22 +64,26 @@ public class MainRouter {
         String username = payload.get(JsonSchema.PAYLOAD_USERNAME).asText();
 
         // --- LIMPIEZA DE IP Y PUERTO ---
-        String cleanIp = rawClientIp.replace("/", ""); // Quitamos el '/'
+        String cleanIp = rawClientIp.replace("/", "");
         String ipAddress = cleanIp;
         int port = 0;
 
         if (cleanIp.contains(":")) {
             String[] parts = cleanIp.split(":");
             ipAddress = parts[0];
-            port = Integer.parseInt(parts[1]); // Extraemos el 47124
+            port = Integer.parseInt(parts[1]);
         }
         // -------------------------------
 
-        // Ejecutar lógica de negocio con los datos separados
+        // Ejecutar lógica de negocio
         long userId = userManager.conectarUsuario(username, ipAddress, port);
 
         // Registrar Log
         logManager.registrarAccion(null, userId, "CONNECT", "SUCCESS", "Usuario conectado desde " + ipAddress + ":" + port);
+
+        // AVISAR A TODOS QUE ALGUIEN NUEVO ENTRÓ (Solo 1 vez)
+        String listaActualizada = handleListClients();
+        broadcastManager.broadcast(listaActualizada);
 
         return serializer.buildSuccessResponse(JsonSchema.ACTION_CONNECT, "Usuario ID: " + userId);
     }
@@ -91,7 +92,7 @@ public class MainRouter {
         List<Map<String, String>> activos = userManager.obtenerClientesActivos();
         return serializer.buildListResponse(JsonSchema.ACTION_LIST_CLIENTS, activos, "clientes");
     }
-    // Añade este método al final de tu clase MainRouter
+
     public void notificarDesconexionFisica(String rawClientIp) {
         try {
             String cleanIp = rawClientIp.replace("/", "");
@@ -102,8 +103,14 @@ public class MainRouter {
                 ipAddress = parts[0];
                 port = Integer.parseInt(parts[1]);
             }
-            // Llamar al servicio
+
+            // 1. Cerrar sesión en la BD
             userManager.desconectarPorCaidaDeRed(ipAddress, port);
+
+            // 2. AVISAR A TODOS QUE ALGUIEN SALIÓ (Aquí es donde debía ir)
+            String listaTrasDesconexion = handleListClients();
+            broadcastManager.broadcast(listaTrasDesconexion);
+
         } catch (Exception e) {
             logger.error("Error procesando desconexión física", e);
         }
