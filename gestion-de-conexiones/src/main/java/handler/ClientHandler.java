@@ -62,27 +62,31 @@ public class ClientHandler implements Runnable {
                     out.write((jsonResponse + "\n").getBytes(StandardCharsets.UTF_8));
                     out.flush();
                 }
-
             } else {
                 // =============== MODO TRANSFERENCIA DE ARCHIVOS ===============
                 String token = primeraLinea.trim();
                 TransferTicket ticket = transferManager.validarYConsumirTicket(token);
 
                 if (ticket != null) {
-                    logger.info("Iniciando recepción de archivo pesado. Token: {}", token);
+                    if (token.startsWith("DWN-")) {
+                        // --- LA NUEVA LÓGICA DE DESCARGA ---
+                        logger.info("Iniciando envío de archivo pesado al cliente. Token: {}", token);
+                        String encryptedPath = ticket.mimeType; // Donde guardamos la ruta temporalmente
 
-                    // ¡LE PASAMOS EL SOCKET DIRECTO AL MOTOR PESADO!
-                    boolean exito = documentManager.procesarRecepcionDocumento(
-                            in, ticket.filename, ticket.sizeBytes, ticket.extension,
-                            ticket.mimeType, ticket.ownerUserId, ticket.ownerIp
-                    );
+                        // Enviar el archivo descifrándolo al vuelo
+                        documentManager.enviarDocumentoAlCliente(encryptedPath, out);
 
-                    // Avisar al cliente si salió bien (usando JSON rápido antes de cerrar)
-                    String status = exito ? "{\"status\":\"UPLOAD_SUCCESS\"}\n" : "{\"status\":\"UPLOAD_FAILED\"}\n";
-                    out.write(status.getBytes(StandardCharsets.UTF_8));
-                    out.flush();
-
-                    // (Opcional) Hacer un broadcast por el router avisando a todos que hay un nuevo archivo
+                    } else {
+                        // --- TU LÓGICA ACTUAL DE SUBIDA (UPL) ---
+                        logger.info("Iniciando recepción de archivo pesado. Token: {}", token);
+                        boolean exito = documentManager.procesarRecepcionDocumento(
+                                in, ticket.filename, ticket.sizeBytes, ticket.extension,
+                                ticket.mimeType, ticket.ownerUserId, ticket.ownerIp
+                        );
+                        String status = exito ? "{\"status\":\"UPLOAD_SUCCESS\"}\n" : "{\"status\":\"UPLOAD_FAILED\"}\n";
+                        out.write(status.getBytes(StandardCharsets.UTF_8));
+                        out.flush();
+                    }
                 } else {
                     logger.warn("Ticket inválido o expirado desde {}", clientIp);
                 }

@@ -257,4 +257,28 @@ public class MySqlDao {
             }
         }
     }
+
+    public Map<String, String> obtenerDetallesDescarga(long documentId) throws Exception {
+        String sql = "SELECT d.name, d.size_bytes, e.encrypted_path " +
+                "FROM documents d " +
+                "JOIN encrypted_documents e ON d.id = e.document_id " +
+                "WHERE d.id = ?";
+
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, documentId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Map<String, String> detalles = new HashMap<>();
+                    detalles.put("nombre", rs.getString("name"));
+                    detalles.put("tamano", String.valueOf(rs.getLong("size_bytes")));
+                    detalles.put("ruta_cifrada", rs.getString("encrypted_path"));
+                    return detalles;
+                } else {
+                    throw new Exception("Documento no encontrado o no tiene archivo físico.");
+                }
+            }
+        }
+    }
 }

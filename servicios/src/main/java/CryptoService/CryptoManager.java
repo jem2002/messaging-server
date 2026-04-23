@@ -66,4 +66,26 @@ public class CryptoManager {
         logger.debug("Procesamiento exitoso. Hash: {}", hashResult);
         return new CryptoResult(hashResult, finalEncryptedPath.toAbsolutePath().toString());
     }
+
+    public void desencriptarYEnviarAlSocket(String encryptedPath, OutputStream networkOut) throws Exception {
+        logger.info("Iniciando descifrado y envío (Streaming) para: {}", encryptedPath);
+
+        // Usamos directamente tu secretKey estática
+        Cipher cipher = cryptoUtils.getDecryptionCipher(secretKey); // Modo DECRYPT
+
+        Path sourcePath = Paths.get(encryptedPath);
+
+        // Leemos del disco (encriptado), pasamos por el Cipher, y escribimos a la red (plano)
+        try (InputStream is = Files.newInputStream(sourcePath);
+             javax.crypto.CipherInputStream cis = new javax.crypto.CipherInputStream(is, cipher)) {
+
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = cis.read(buffer)) != -1) {
+                networkOut.write(buffer, 0, bytesRead);
+            }
+            networkOut.flush(); // Aseguramos que el último bloque salga al cliente
+        }
+        logger.debug("Envío del archivo completado exitosamente.");
+    }
 }

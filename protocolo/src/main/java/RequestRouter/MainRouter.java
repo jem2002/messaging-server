@@ -53,6 +53,8 @@ public class MainRouter {
                 // 1. Añadir al switch dentro de routeRequest:
                 case JsonSchema.ACTION_UPLOAD_INIT:
                     return handleUploadInit(request.getPayload(), clientIp);
+                case JsonSchema.ACTION_DOWNLOAD_INIT:
+                    return handleDownloadInit(request.getPayload(), clientIp);
                 default:
                     return serializer.buildErrorResponse("Acción no soportada.");
             }
@@ -153,6 +155,31 @@ public class MainRouter {
         } catch (Exception e) {
             logger.error("Error al generar ticket de subida", e);
             return serializer.buildErrorResponse("Datos de archivo inválidos.");
+        }
+    }
+
+    private String handleDownloadInit(JsonNode payload, String clientIp) {
+        try {
+            long docId = payload.get("document_id").asLong();
+
+            // Buscar los detalles
+            Map<String, String> detalles = documentManager.obtenerDetallesDescarga(docId);
+            String filename = detalles.get("nombre");
+            long size = Long.parseLong(detalles.get("tamano"));
+            String encryptedPath = detalles.get("ruta_cifrada");
+
+            // ¡IMPORTANTE! Le ponemos el prefijo DWN- para distinguirlo de las subidas
+            String token = "DWN-" + java.util.UUID.randomUUID().toString();
+
+            // Reutilizamos TransferTicket (puedes pasarle el encryptedPath en el campo 'mimeType' o añadir un campo nuevo)
+            TransferTicket ticket = new TransferTicket(token, filename, size, "", encryptedPath, 0, clientIp);
+            transferManager.registrarTicket(ticket);
+
+            return serializer.buildSuccessResponse("DOWNLOAD_INIT", token);
+
+        } catch (Exception e) {
+            logger.error("Error al generar ticket de descarga", e);
+            return serializer.buildErrorResponse("No se pudo preparar la descarga.");
         }
     }
 }

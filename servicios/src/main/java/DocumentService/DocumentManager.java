@@ -27,7 +27,16 @@ public class DocumentManager {
         this.dao = dao;
         this.logManager = logManager;
     }
+    // 1. Método puente para buscar los detalles en la BD (Para el Router)
+    public Map<String, String> obtenerDetallesDescarga(long documentId) throws Exception {
+        return dao.obtenerDetallesDescarga(documentId);
+    }
 
+    // 2. Método puente para desencriptar y enviar (Para el Handler)
+    // Asegúrate de tener: import java.io.OutputStream; arriba
+    public void enviarDocumentoAlCliente(String encryptedPath, java.io.OutputStream out) throws Exception {
+        cryptoManager.desencriptarYEnviarAlSocket(encryptedPath, out);
+    }
     public List<Map<String, String>> obtenerDocumentosDisponibles() {
         try {
             return dao.listarDocumentosDisponibles();
