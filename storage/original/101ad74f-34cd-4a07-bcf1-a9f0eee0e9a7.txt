@@ -1,0 +1,1 @@
+(echo "c7b07d70-71d9-4be3-86a8-732c950488a2"; cat /home/zebastor/archivo_gigante.bin) | nc localhost 8080

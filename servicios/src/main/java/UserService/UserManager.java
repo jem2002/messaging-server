@@ -41,4 +41,7 @@ public class UserManager {
             return new ArrayList<>(); // Retorna lista vacía si hay error
         }
     }
+    public long obtenerIdUsuario(String username) throws Exception {
+        return dao.obtenerIdUsuarioPorUsername(username);
+    }
 }

@@ -1,13 +1,19 @@
 package DocumentService;
 
 public class CryptoResult {
-    public final String hashValue;
-    public final String encryptedPath;
-    public final String algorithmHash = "SHA256";
-    public final String algorithmCipher = "AES256";
+    private final String hashResult;
+    private final String finalEncryptedPath;
 
-    public CryptoResult(String hashValue, String encryptedPath) {
-        this.hashValue = hashValue;
-        this.encryptedPath = encryptedPath;
+    public CryptoResult(String hashResult, String finalEncryptedPath) {
+        this.hashResult = hashResult;
+        this.finalEncryptedPath = finalEncryptedPath;
+    }
+
+    public String getHashResult() {
+        return hashResult;
+    }
+
+    public String getFinalEncryptedPath() {
+        return finalEncryptedPath;
     }
 }

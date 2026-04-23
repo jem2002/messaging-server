@@ -13,7 +13,7 @@ public final class JsonSchema {
     // --- Valores permitidos para 'action' ---
     public static final String ACTION_CONNECT = "CONNECT";
     public static final String ACTION_ERROR = "ERROR";
-
+    public static final String ACTION_UPLOAD_INIT = "UPLOAD_INIT";
     // Aquí agregaremos luego las demás (LIST_CLIENTS, SEND_DOC, etc.)
 // Añade esto debajo de ACTION_CONNECT
     public static final String ACTION_LIST_CLIENTS = "LIST_CLIENTS";

@@ -1,7 +1,9 @@
 package tcpsocketserver;
 
+import DocumentService.DocumentManager;
 import MessageParser.BroadcastManager;
 import RequestRouter.MainRouter;
+import RequestRouter.TransferManager;
 import executor.ThreadPoolManager;
 import handler.ClientHandler;
 import org.slf4j.Logger;
@@ -24,13 +26,21 @@ public class TCPSocketServer implements Runnable {
     private ServerSocket serverSocket;
     private final BroadcastManager broadcastManager;
 
-    public TCPSocketServer(int port, IConnectionPool pool, ThreadPoolManager threadPool, MainRouter router, BroadcastManager broadcastManager) {
+    // 1. NUEVOS ATRIBUTOS
+    private final TransferManager transferManager;
+    private final DocumentManager documentManager;
+
+    // 2. PEDIRLOS EN EL CONSTRUCTOR
+    public TCPSocketServer(int port, IConnectionPool pool, ThreadPoolManager threadPool, MainRouter router,
+                           BroadcastManager broadcastManager, TransferManager transferManager, DocumentManager documentManager) {
         this.port = port;
         this.pool = pool;
         this.threadPool = threadPool;
         this.router = router;
         this.running = true;
         this.broadcastManager = broadcastManager;
+        this.transferManager = transferManager;
+        this.documentManager = documentManager;
     }
 
     public void stopServer() {
@@ -66,7 +76,9 @@ public class TCPSocketServer implements Runnable {
 
                 // 3. Configurar el socket y delegar al Handler en el ThreadPool
                 pooledConnection.setSocket(clientSocket);
-                ClientHandler handler = new ClientHandler(pooledConnection, pool, router, this.broadcastManager);
+
+                // 4. PASAR LAS NUEVAS DEPENDENCIAS AL HANDLER
+                ClientHandler handler = new ClientHandler(pooledConnection, pool, router, this.broadcastManager, this.transferManager, this.documentManager);
                 threadPool.execute(handler);
             }
         } catch (IOException e) {

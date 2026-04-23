@@ -23,14 +23,15 @@ public class MainRouter {
     private final DocumentManager documentManager;
     private final BroadcastManager broadcastManager;
     private final LogManager logManager;
+    private final TransferManager transferManager;
 
-    public MainRouter(UserManager userManager, DocumentManager documentManager, LogManager logManager, BroadcastManager broadcastManager) {
-        this.parser = new JsonInputParser();
+    public MainRouter(UserManager userManager, DocumentManager documentManager, LogManager logManager, BroadcastManager broadcastManager, TransferManager transferManager) {      this.parser = new JsonInputParser();
         this.serializer = new ResponseBuilder();
         this.userManager = userManager;
         this.documentManager = documentManager;
         this.broadcastManager = broadcastManager;
         this.logManager = logManager;
+        this.transferManager = transferManager;
     }
 
     public String routeRequest(String rawJson, String clientIp) {
@@ -49,6 +50,9 @@ public class MainRouter {
                 // Futuros endpoints irán aquí
                 case JsonSchema.ACTION_LIST_DOCUMENTS:
                     return handleListDocuments();
+                // 1. Añadir al switch dentro de routeRequest:
+                case JsonSchema.ACTION_UPLOAD_INIT:
+                    return handleUploadInit(request.getPayload(), clientIp);
                 default:
                     return serializer.buildErrorResponse("Acción no soportada.");
             }
@@ -122,5 +126,33 @@ public class MainRouter {
         List<Map<String, String>> docs = documentManager.obtenerDocumentosDisponibles();
         // Usamos el mismo método del serializador, pero le pasamos la lista de docs y le llamamos "documentos"
         return serializer.buildListResponse(JsonSchema.ACTION_LIST_DOCUMENTS, docs, "documentos");
+    }
+
+    // 2. Crear el método (necesitarás inyectar TransferManager en el constructor del router):
+    private String handleUploadInit(JsonNode payload, String clientIp) {
+        try {
+            String filename = payload.get("filename").asText();
+            long size = payload.get("size").asLong();
+            String extension = payload.get("extension").asText();
+            String mimeType = payload.get("mimeType").asText();
+            String username = payload.get("username").asText(); // Quién lo sube
+
+            // Buscar el ID del usuario en BD
+            long userId = userManager.obtenerIdUsuario(username);
+
+            // Generar un Ticket único
+            String token = java.util.UUID.randomUUID().toString();
+
+            // Guardar el ticket en memoria
+            TransferTicket ticket = new TransferTicket(token, filename, size, extension, mimeType, userId, clientIp);
+            transferManager.registrarTicket(ticket);
+
+            // Responder al cliente con su ticket
+            return serializer.buildSuccessResponse(JsonSchema.ACTION_UPLOAD_INIT, token);
+
+        } catch (Exception e) {
+            logger.error("Error al generar ticket de subida", e);
+            return serializer.buildErrorResponse("Datos de archivo inválidos.");
+        }
     }
 }

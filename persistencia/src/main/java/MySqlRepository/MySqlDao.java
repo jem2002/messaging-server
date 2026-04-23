@@ -50,15 +50,14 @@ public class MySqlDao {
         }
     }
 
-    public long registrarDocumento(String nombre, long sizeBytes, String extension, String mimeType,
-                                   String docType, String originalPath, long ownerUserId, String ownerIp) throws SQLException {
+    // 1. Guardar el Documento principal
+    public long registrarDocumento(String name, long sizeBytes, String extension, String mimeType,
+                                   String docType, String originalPath, long ownerUserId, String ownerIp) throws Exception {
         String sql = "INSERT INTO documents (name, size_bytes, extension, mime_type, doc_type, original_path, owner_user_id, owner_ip) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
         try (Connection conn = dbManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setString(1, nombre);
+            stmt.setString(1, name);
             stmt.setLong(2, sizeBytes);
             stmt.setString(3, extension);
             stmt.setString(4, mimeType);
@@ -66,20 +65,19 @@ public class MySqlDao {
             stmt.setString(6, originalPath);
             stmt.setLong(7, ownerUserId);
             stmt.setString(8, ownerIp);
-
             stmt.executeUpdate();
 
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    return generatedKeys.getLong(1);
-                } else {
-                    throw new SQLException("Fallo al obtener el ID del documento insertado.");
-                }
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getLong(1);
+            } else {
+                throw new Exception("No se pudo obtener el ID del documento generado.");
             }
         }
     }
 
-    public void registrarHashDocumento(long documentId, String algorithm, String hashValue) throws SQLException {
+    // 2. Guardar el Hash
+    public void registrarHashDocumento(long documentId, String algorithm, String hashValue) throws Exception {
         String sql = "INSERT INTO document_hashes (document_id, algorithm, hash_value) VALUES (?, ?, ?)";
         try (Connection conn = dbManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -89,8 +87,8 @@ public class MySqlDao {
             stmt.executeUpdate();
         }
     }
-
-    public void registrarCifradoDocumento(long documentId, String algorithm, String encryptedPath, String keyReference) throws SQLException {
+    // 3. Guardar el Cifrado
+    public void registrarCifradoDocumento(long documentId, String algorithm, String encryptedPath, String keyReference) throws Exception {
         String sql = "INSERT INTO encrypted_documents (document_id, algorithm, encrypted_path, key_reference) VALUES (?, ?, ?, ?)";
         try (Connection conn = dbManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -243,5 +241,20 @@ public class MySqlDao {
         }
     }
 
+    public long obtenerIdUsuarioPorUsername(String username) throws Exception {
+        String sql = "SELECT id FROM users WHERE username = ?";
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+            stmt.setString(1, username);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("id");
+                } else {
+                    throw new Exception("El usuario " + username + " no existe en la base de datos.");
+                }
+            }
+        }
+    }
 }

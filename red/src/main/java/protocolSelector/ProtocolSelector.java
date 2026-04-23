@@ -1,7 +1,9 @@
 package protocolSelector;
 
+import DocumentService.DocumentManager;
 import MessageParser.BroadcastManager;
 import RequestRouter.MainRouter;
+import RequestRouter.TransferManager;
 import executor.ThreadPoolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +26,12 @@ public class ProtocolSelector {
      * @param router Router del protocolo JSON
      */
     public void iniciarServidor(String protocol, int port, IConnectionPool pool,
-                                ThreadPoolManager threadPool, MainRouter router, BroadcastManager broadcastManager) {
+                                ThreadPoolManager threadPool, MainRouter router, BroadcastManager broadcastManager, TransferManager transferManager, // <-- AÑADIR
+                                DocumentManager documentManager) {
 
         if ("TCP".equalsIgnoreCase(protocol)) {
             logger.info("Iniciando servicio en modo TCP...");
-            tcpServer = new TCPSocketServer(port, pool, threadPool, router, broadcastManager); // <-- PASAR AQUÍ
+            tcpServer = new TCPSocketServer(port, pool, threadPool, router, broadcastManager, transferManager, documentManager);// <-- PASAR AQUÍ
             new Thread(tcpServer, "Thread-TCPServer").start();
 
         } else if ("UDP".equalsIgnoreCase(protocol)) {

@@ -1,11 +1,13 @@
 import CryptoService.CryptoManager;
 import DocumentService.DocumentManager;
+import FileSystemStorage.LocalFileManager;
 import FileStorageService.StorageManager;
 import LogService.LogManager;
 import MessageParser.BroadcastManager;
 import MySqlRepository.DatabaseInitializer;
 import MySqlRepository.MySqlDao;
 import RequestRouter.MainRouter;
+import RequestRouter.TransferManager;
 import UserService.UserManager;
 import api.ServerAdminAPI;
 import config.ServerConfig;
@@ -33,13 +35,17 @@ public class ServerApplication {
 
             // 3. Módulo Servicios
             UserManager userManager = new UserManager(dao);
-            StorageManager storageManager = new StorageManager();
+         //   StorageManager storageManager = new StorageManager();
+            LocalFileManager fileManager = new LocalFileManager();
             CryptoManager cryptoManager = new CryptoManager();
             LogManager logManager = new LogManager(dao);
-            DocumentManager documentManager = new DocumentManager(storageManager, cryptoManager, dao, logManager);
+         //
+            //   DocumentManager documentManager = new DocumentManager(storageManager, cryptoManager, dao, logManager);
+            DocumentManager documentManager = new DocumentManager(fileManager, cryptoManager, dao, logManager);
             BroadcastManager broadcastManager = new BroadcastManager();
+            TransferManager transferManager = new TransferManager();
             // 4. Módulo Protocolo
-            MainRouter router = new MainRouter(userManager, documentManager, logManager,broadcastManager);
+            MainRouter router = new MainRouter(userManager, documentManager, logManager, broadcastManager, transferManager);
 
             // 5. Módulo Gestión de Conexiones
             int maxConnections = config.getMaxConnections();
@@ -54,7 +60,9 @@ public class ServerApplication {
                     pool,
                     threadPool,
                     router,
-                    broadcastManager
+                    broadcastManager,
+                    transferManager, // <-- PASARLO AQUÍ
+                    documentManager
             );
 
             // 7. Interfaces Expuestas y Consola Administrativa

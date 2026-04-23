@@ -6,13 +6,17 @@ import EncryptionUtils.IEncryptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.UUID;
@@ -24,9 +28,7 @@ public class CryptoManager {
     private static SecretKey secretKey;
 
     public CryptoManager() {
-        // Inyectamos la utilería compartida
         this.cryptoUtils = new EncryptionUtils();
-
         try {
             if (secretKey == null) {
                 secretKey = cryptoUtils.generateKey();
@@ -36,19 +38,21 @@ public class CryptoManager {
         }
     }
 
-    public CryptoResult procesarArchivo(String originalPath, String targetEncryptedPath) throws Exception {
-        logger.info("Iniciando Hash y Cifrado usando utilería Shared para: {}", originalPath);
+    public CryptoResult procesarArchivo(String originalPath, String targetEncryptedDir) throws Exception {
+        logger.info("Iniciando Hash y Cifrado en un solo pase para: {}", originalPath);
 
-        // Obtenemos los motores desde el módulo Shared
         MessageDigest digest = cryptoUtils.getHashDigest();
         Cipher cipher = cryptoUtils.getEncryptionCipher(secretKey);
 
-        String finalEncryptedPath = targetEncryptedPath + File.separator + UUID.randomUUID().toString() + ".enc";
+        // Usamos java.nio.file.Path para las rutas
+        Path sourcePath = Paths.get(originalPath);
+        Path finalEncryptedPath = Paths.get(targetEncryptedDir, UUID.randomUUID().toString() + ".enc");
 
-        try (FileInputStream fis = new FileInputStream(originalPath);
-             DigestInputStream dis = new DigestInputStream(fis, digest);
-             FileOutputStream fos = new FileOutputStream(finalEncryptedPath);
-             CipherOutputStream cos = new CipherOutputStream(fos, cipher)) {
+        // Streaming con NIO (Más rápido y moderno que FileInputStream/FileOutputStream)
+        try (InputStream is = Files.newInputStream(sourcePath);
+             DigestInputStream dis = new DigestInputStream(is, digest);
+             OutputStream os = Files.newOutputStream(finalEncryptedPath);
+             CipherOutputStream cos = new CipherOutputStream(os, cipher)) {
 
             byte[] buffer = new byte[8192];
             int bytesRead;
@@ -57,9 +61,9 @@ public class CryptoManager {
             }
         }
 
-        // Usamos la función transversal para el Hex
         String hashResult = cryptoUtils.bytesToHex(digest.digest());
 
-        return new CryptoResult(hashResult, finalEncryptedPath);
+        logger.debug("Procesamiento exitoso. Hash: {}", hashResult);
+        return new CryptoResult(hashResult, finalEncryptedPath.toAbsolutePath().toString());
     }
 }
