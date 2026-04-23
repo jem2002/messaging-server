@@ -15,6 +15,8 @@ import console.InteractiveConsole;
 import executor.ThreadPoolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import pool.ConnectionPoolManager;
 import protocolSelector.ProtocolSelector;
 
@@ -22,6 +24,15 @@ public class ServerApplication {
     private static final Logger logger = LoggerFactory.getLogger(ServerApplication.class);
 
     public static void main(String[] args) {
+        // Silenciar logs de HikariCP programáticamente
+        try {
+            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+            loggerContext.getLogger("com.zaxxer.hikari").setLevel(Level.WARN);
+            loggerContext.getLogger("com.zaxxer.hikari.pool.HikariPool").setLevel(Level.WARN);
+        } catch (Exception e) {
+            // Si no es logback, ignorar
+        }
+
         logger.info("Arrancando Messaging Server...");
 
         try {
@@ -29,7 +40,7 @@ public class ServerApplication {
             ServerConfig config = new ServerConfig();
 
             // 2. Módulo Persistencia
-          //  DatabaseInitializer.initializeSchema();
+            //DatabaseInitializer.initializeSchema();
             MySqlDao dao = new MySqlDao();
             dao.limpiarConexionesMuertas();
 

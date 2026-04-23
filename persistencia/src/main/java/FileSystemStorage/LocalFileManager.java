@@ -33,11 +33,24 @@ public class LocalFileManager {
         }
     }
 
-    public String guardarOriginal(InputStream inputStream, String extension) throws IOException {
+    public String guardarOriginal(InputStream inputStream, String extension, long expectedSize) throws IOException {
         String fileName = generarNombreUnico(extension);
         Path targetLocation = originalDir.resolve(fileName);
 
-        Files.copy(inputStream, targetLocation, StandardCopyOption.REPLACE_EXISTING);
+        try (OutputStream out = new FileOutputStream(targetLocation.toFile())) {
+            byte[] buffer = new byte[8192];
+            long totalRead = 0;
+            int read;
+            while (totalRead < expectedSize) {
+                int toRead = (int) Math.min(buffer.length, expectedSize - totalRead);
+                read = inputStream.read(buffer, 0, toRead);
+                if (read == -1) {
+                    throw new EOFException("Conexión cerrada prematuramente durante la subida. Leidos: " + totalRead + " de " + expectedSize);
+                }
+                out.write(buffer, 0, read);
+                totalRead += read;
+            }
+        }
         logger.debug("Archivo original guardado en: {}", targetLocation.toAbsolutePath());
 
         return targetLocation.toAbsolutePath().toString();

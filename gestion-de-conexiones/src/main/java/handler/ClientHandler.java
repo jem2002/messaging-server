@@ -40,55 +40,53 @@ public class ClientHandler implements Runnable {
             InputStream in = connection.getInputStream();
             out = connection.getOutputStream();
 
-            // LECTURA DE LA PRIMERA LÍNEA (Byte por byte hasta encontrar un Enter)
-            String primeraLinea = leerPrimeraLinea(in);
+            // MODO UNIFICADO
+            broadcastManager.addStream(out);
+            logger.info("Atendiendo cliente unificado desde {}", clientIp);
 
-            if (primeraLinea.startsWith("{")) {
-                // =============== MODO NORMAL (JSON CHAT) ===============
-                broadcastManager.addStream(out);
-                logger.info("Atendiendo cliente normal desde {}", clientIp);
+            while (true) {
+                String linea = leerLinea(in);
+                if (linea == null) {
+                    break; // Fin del stream (cliente se desconectó)
+                }
 
-                // Procesar esa primera línea
-                String resp = router.routeRequest(primeraLinea, clientIp);
-                out.write((resp + "\n").getBytes(StandardCharsets.UTF_8));
-                out.flush();
+                if (linea.isEmpty()) {
+                    continue; // Ignorar líneas vacías
+                }
 
-                // Seguir en el bucle normal
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = in.read(buffer)) != -1) {
-                    String rawJson = new String(buffer, 0, bytesRead, StandardCharsets.UTF_8).trim();
-                    String jsonResponse = router.routeRequest(rawJson, clientIp);
+                if (linea.startsWith("{")) {
+                    // =============== MODO NORMAL (JSON CHAT) ===============
+                    String jsonResponse = router.routeRequest(linea, clientIp);
                     out.write((jsonResponse + "\n").getBytes(StandardCharsets.UTF_8));
                     out.flush();
-                }
-            } else {
-                // =============== MODO TRANSFERENCIA DE ARCHIVOS ===============
-                String token = primeraLinea.trim();
-                TransferTicket ticket = transferManager.validarYConsumirTicket(token);
-
-                if (ticket != null) {
-                    if (token.startsWith("DWN-")) {
-                        // --- LA NUEVA LÓGICA DE DESCARGA ---
-                        logger.info("Iniciando envío de archivo pesado al cliente. Token: {}", token);
-                        String encryptedPath = ticket.mimeType; // Donde guardamos la ruta temporalmente
-
-                        // Enviar el archivo descifrándolo al vuelo
-                        documentManager.enviarDocumentoAlCliente(encryptedPath, out);
-
-                    } else {
-                        // --- TU LÓGICA ACTUAL DE SUBIDA (UPL) ---
-                        logger.info("Iniciando recepción de archivo pesado. Token: {}", token);
-                        boolean exito = documentManager.procesarRecepcionDocumento(
-                                in, ticket.filename, ticket.sizeBytes, ticket.extension,
-                                ticket.mimeType, ticket.ownerUserId, ticket.ownerIp
-                        );
-                        String status = exito ? "{\"status\":\"UPLOAD_SUCCESS\"}\n" : "{\"status\":\"UPLOAD_FAILED\"}\n";
-                        out.write(status.getBytes(StandardCharsets.UTF_8));
-                        out.flush();
-                    }
                 } else {
-                    logger.warn("Ticket inválido o expirado desde {}", clientIp);
+                    // =============== MODO TRANSFERENCIA DE ARCHIVOS ===============
+                    String token = linea;
+                    TransferTicket ticket = transferManager.validarYConsumirTicket(token);
+
+                    if (ticket != null) {
+                        if (token.startsWith("DWN-")) {
+                            // --- LA NUEVA LÓGICA DE DESCARGA ---
+                            logger.info("Iniciando envío de archivo pesado al cliente. Token: {}", token);
+                            String encryptedPath = ticket.mimeType; // Donde guardamos la ruta temporalmente
+
+                            // Enviar el archivo descifrándolo al vuelo
+                            documentManager.enviarDocumentoAlCliente(encryptedPath, out);
+
+                        } else {
+                            // --- LÓGICA ACTUAL DE SUBIDA (UPL) ---
+                            logger.info("Iniciando recepción de archivo pesado. Token: {}", token);
+                            boolean exito = documentManager.procesarRecepcionDocumento(
+                                    in, ticket.filename, ticket.sizeBytes, ticket.extension,
+                                    ticket.mimeType, ticket.ownerUserId, ticket.ownerIp
+                            );
+                            String status = exito ? "{\"status\":\"UPLOAD_SUCCESS\"}\n" : "{\"status\":\"UPLOAD_FAILED\"}\n";
+                            out.write(status.getBytes(StandardCharsets.UTF_8));
+                            out.flush();
+                        }
+                    } else {
+                        logger.warn("Ticket inválido o ignorado desde {}", clientIp);
+                    }
                 }
             }
 
@@ -101,13 +99,16 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    // MÉTODO AUXILIAR PARA LEER LA PRIMERA LÍNEA SIN ROMPER LOS BYTES
-    private String leerPrimeraLinea(InputStream in) throws Exception {
+    // MÉTODO AUXILIAR PARA LEER UNA LÍNEA SIN ROMPER LOS BYTES
+    private String leerLinea(InputStream in) throws Exception {
         StringBuilder sb = new StringBuilder();
         int c;
         while ((c = in.read()) != -1) {
             if (c == '\n') break;
             sb.append((char) c);
+        }
+        if (c == -1 && sb.length() == 0) {
+            return null; // EOF
         }
         return sb.toString().trim();
     }

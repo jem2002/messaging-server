@@ -197,14 +197,29 @@ public class MySqlDao {
             stmt.executeUpdate();
         }
     }
-    public void cerrarSesionPorIpYPuerto(String ipAddress, int port) throws Exception {
-        String sql = "UPDATE client_connections SET is_active = FALSE, disconnected_at = NOW() WHERE ip_address = ? AND port = ? AND is_active = TRUE";
-        try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, ipAddress);
-            stmt.setInt(2, port);
-            stmt.executeUpdate();
+    public long cerrarSesionPorIpYPuerto(String ipAddress, int port) throws Exception {
+        String selectSql = "SELECT user_id FROM client_connections WHERE ip_address = ? AND port = ? AND is_active = TRUE";
+        String updateSql = "UPDATE client_connections SET is_active = FALSE, disconnected_at = NOW() WHERE ip_address = ? AND port = ? AND is_active = TRUE";
+
+        long userId = 0;
+        try (Connection conn = dbManager.getConnection()) {
+            try (PreparedStatement selectStmt = conn.prepareStatement(selectSql)) {
+                selectStmt.setString(1, ipAddress);
+                selectStmt.setInt(2, port);
+                try (ResultSet rs = selectStmt.executeQuery()) {
+                    if (rs.next()) {
+                        userId = rs.getLong("user_id");
+                    }
+                }
+            }
+
+            try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                updateStmt.setString(1, ipAddress);
+                updateStmt.setInt(2, port);
+                updateStmt.executeUpdate();
+            }
         }
+        return userId;
     }
     public List<Map<String, String>> listarClientesActivos() throws Exception {
         List<Map<String, String>> activos = new ArrayList<>();
@@ -280,5 +295,33 @@ public class MySqlDao {
                 }
             }
         }
+    }
+
+    public List<Map<String, String>> listarLogs() throws Exception {
+        List<Map<String, String>> logs = new ArrayList<>();
+        String sql = "SELECT l.id, l.document_id, u1.username as sender, " +
+                "l.action, l.protocol, l.status, l.details, l.timestamp " +
+                "FROM logs l " +
+                "LEFT JOIN users u1 ON l.sender_user_id = u1.id " +
+                "ORDER BY l.id DESC";
+
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Map<String, String> log = new HashMap<>();
+                log.put("id", String.valueOf(rs.getLong("id")));
+                log.put("document_id", rs.getString("document_id") != null ? rs.getString("document_id") : "");
+                log.put("sender", rs.getString("sender") != null ? rs.getString("sender") : "");
+                log.put("action", rs.getString("action"));
+                log.put("protocol", rs.getString("protocol"));
+                log.put("status", rs.getString("status"));
+                log.put("details", rs.getString("details"));
+                log.put("timestamp", rs.getString("timestamp"));
+                logs.add(log);
+            }
+        }
+        return logs;
     }
 }

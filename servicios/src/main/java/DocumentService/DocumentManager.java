@@ -52,7 +52,7 @@ public class DocumentManager {
         try {
             // 1. Delegar I/O a tu LocalFileManager (Streaming puro al disco)
             logger.info("1. Guardando original en disco...");
-            String originalPath = fileManager.guardarOriginal(redStream, extension);
+            String originalPath = fileManager.guardarOriginal(redStream, extension, sizeBytes);
 
             // 2. Generar Hash y Cifrar en un solo pase (Single-Pass Streaming)
             logger.info("2. Generando Hash y cifrando...");

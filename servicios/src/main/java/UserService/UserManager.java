@@ -25,12 +25,14 @@ public class UserManager {
     }
 
     // 2. NUEVO MÉTODO PARA CERRAR LA SESIÓN
-    public void desconectarPorCaidaDeRed(String ipAddress, int port) {
+    public long desconectarPorCaidaDeRed(String ipAddress, int port) {
         try {
-            dao.cerrarSesionPorIpYPuerto(ipAddress, port);
-            logger.info("Estado actualizado: Sesión cerrada en BD para {}:{}", ipAddress, port);
+            long userId = dao.cerrarSesionPorIpYPuerto(ipAddress, port);
+            logger.info("Estado actualizado: Sesión cerrada en BD para {}:{} (User ID: {})", ipAddress, port, userId);
+            return userId;
         } catch (Exception e) {
             logger.error("Error al cerrar sesión por caída de red", e);
+            return 0;
         }
     }
     public List<Map<String, String>> obtenerClientesActivos() {

@@ -22,6 +22,7 @@ public final class JsonSchema {
     public static final String ACTION_LIST_CLIENTS = "LIST_CLIENTS";
     // Debajo de tus otras constantes ACTION_...
     public static final String ACTION_LIST_DOCUMENTS = "LIST_DOCUMENTS";
+    public static final String ACTION_LIST_LOGS = "LIST_LOGS";
     // --- Llaves permitidas dentro del 'payload' ---
     public static final String PAYLOAD_USERNAME = "username";
     public static final String PAYLOAD_REASON = "reason";

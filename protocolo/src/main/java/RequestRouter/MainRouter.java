@@ -50,6 +50,8 @@ public class MainRouter {
                 // Futuros endpoints irán aquí
                 case JsonSchema.ACTION_LIST_DOCUMENTS:
                     return handleListDocuments();
+                case JsonSchema.ACTION_LIST_LOGS:
+                    return handleListLogs();
                 // 1. Añadir al switch dentro de routeRequest:
                 case JsonSchema.ACTION_UPLOAD_INIT:
                     return handleUploadInit(request.getPayload(), clientIp);
@@ -91,9 +93,9 @@ public class MainRouter {
         // Registrar Log
         logManager.registrarAccion(null, userId, "CONNECT", "SUCCESS", "Usuario conectado desde " + ipAddress + ":" + port);
 
-        // AVISAR A TODOS QUE ALGUIEN NUEVO ENTRÓ (Solo 1 vez)
-        String listaActualizada = handleListClients();
-        broadcastManager.broadcast(listaActualizada);
+       
+        broadcastManager.broadcast(handleListClients());
+        broadcastManager.broadcast(handleListLogs());
 
         return serializer.buildSuccessResponse(JsonSchema.ACTION_CONNECT, "Usuario ID: " + userId);
     }
@@ -115,7 +117,11 @@ public class MainRouter {
             }
 
             // 1. Cerrar sesión en la BD
-            userManager.desconectarPorCaidaDeRed(ipAddress, port);
+            long userId = userManager.desconectarPorCaidaDeRed(ipAddress, port);
+
+            // LOG Y BROADCAST DE LOGS
+            logManager.registrarAccion(null, userId, "DISCONNECT", "SUCCESS", "Desconexión física: " + ipAddress + ":" + port);
+            broadcastManager.broadcast(handleListLogs());
 
             // 2. AVISAR A TODOS QUE ALGUIEN SALIÓ (Aquí es donde debía ir)
             String listaTrasDesconexion = handleListClients();
@@ -130,6 +136,11 @@ public class MainRouter {
         List<Map<String, String>> docs = documentManager.obtenerDocumentosDisponibles();
         // Usamos el mismo método del serializador, pero le pasamos la lista de docs y le llamamos "documentos"
         return serializer.buildListResponse(JsonSchema.ACTION_LIST_DOCUMENTS, docs, "documentos");
+    }
+
+    private String handleListLogs() {
+        List<Map<String, String>> logs = logManager.listarLogs();
+        return serializer.buildListResponse(JsonSchema.ACTION_LIST_LOGS, logs, "logs");
     }
 
     // 2. Crear el método (necesitarás inyectar TransferManager en el constructor del router):
@@ -150,6 +161,10 @@ public class MainRouter {
             // Guardar el ticket en memoria
             TransferTicket ticket = new TransferTicket(token, filename, size, extension, mimeType, userId, clientIp);
             transferManager.registrarTicket(ticket);
+
+            // LOG Y BROADCAST DE LOGS
+            logManager.registrarAccion(null, userId, "UPLOAD_INIT", "SUCCESS", "Ticket de subida: " + filename);
+            broadcastManager.broadcast(handleListLogs());
 
             // Responder al cliente con su ticket
             return serializer.buildSuccessResponse(JsonSchema.ACTION_UPLOAD_INIT, token);
@@ -176,6 +191,10 @@ public class MainRouter {
             // Reutilizamos TransferTicket (puedes pasarle el encryptedPath en el campo 'mimeType' o añadir un campo nuevo)
             TransferTicket ticket = new TransferTicket(token, filename, size, "", encryptedPath, 0, clientIp);
             transferManager.registrarTicket(ticket);
+
+            // LOG Y BROADCAST DE LOGS
+            logManager.registrarAccion(docId, 0, "DOWNLOAD_INIT", "SUCCESS", "Ticket de descarga para DocID: " + docId);
+            broadcastManager.broadcast(handleListLogs());
 
             return serializer.buildSuccessResponse("DOWNLOAD_INIT", token);
 
@@ -212,6 +231,10 @@ public class MainRouter {
                     "De " + fromUser + ": " + content
             );
             broadcastManager.broadcast(mensajeRealTime);
+
+            // LOG Y BROADCAST DE LOGS
+            logManager.registrarAccion(null, userId, "SEND_MESSAGE", "SUCCESS", "Mensaje enviado por " + fromUser);
+            broadcastManager.broadcast(handleListLogs());
 
             // 4. Le respondemos a quien lo envió que todo salió bien
             return serializer.buildSuccessResponse(JsonSchema.ACTION_SEND_MESSAGE, "Mensaje procesado, encriptado y entregado.");
