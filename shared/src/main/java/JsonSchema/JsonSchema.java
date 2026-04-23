@@ -16,6 +16,8 @@ public final class JsonSchema {
     public static final String ACTION_UPLOAD_INIT = "UPLOAD_INIT";
     public static final String ACTION_DOWNLOAD_INIT = "DOWNLOAD_INIT";
     // Aquí agregaremos luego las demás (LIST_CLIENTS, SEND_DOC, etc.)
+    public static final String ACTION_SEND_MESSAGE = "SEND_MESSAGE"; // El cliente lo envía
+    public static final String ACTION_NEW_MESSAGE = "NEW_MESSAGE";   // El servidor lo retransmite
 // Añade esto debajo de ACTION_CONNECT
     public static final String ACTION_LIST_CLIENTS = "LIST_CLIENTS";
     // Debajo de tus otras constantes ACTION_...

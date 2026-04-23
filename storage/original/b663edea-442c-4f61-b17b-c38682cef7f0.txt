@@ -1,0 +1,1 @@
+Hola Bob, soy el cliente A

@@ -55,6 +55,8 @@ public class MainRouter {
                     return handleUploadInit(request.getPayload(), clientIp);
                 case JsonSchema.ACTION_DOWNLOAD_INIT:
                     return handleDownloadInit(request.getPayload(), clientIp);
+                case JsonSchema.ACTION_SEND_MESSAGE:
+                    return handleSendMessage(request.getPayload(), clientIp);
                 default:
                     return serializer.buildErrorResponse("Acción no soportada.");
             }
@@ -180,6 +182,43 @@ public class MainRouter {
         } catch (Exception e) {
             logger.error("Error al generar ticket de descarga", e);
             return serializer.buildErrorResponse("No se pudo preparar la descarga.");
+        }
+    }
+
+    private String handleSendMessage(JsonNode payload, String clientIp) {
+        try {
+            String fromUser = payload.get("username").asText();
+            String content = payload.get("message").asText();
+
+            // 1. Obtenemos el ID del remitente
+            long userId = userManager.obtenerIdUsuario(fromUser);
+
+            // 2. EL TRUCO ARQUITECTÓNICO: Convertimos el String de texto en un flujo de bytes (InputStream)
+            java.io.InputStream textStream = new java.io.ByteArrayInputStream(content.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+            // Le inventamos un nombre de archivo único
+            String nombreArchivo = "msg_" + fromUser + "_" + System.currentTimeMillis() + ".txt";
+
+            // ¡Magia! Le pasamos el texto a tu motor de archivos pesados.
+            // Él se encarga de guardarlo en disco, sacar el Hash, encriptarlo y meterlo en MySQL.
+            documentManager.procesarRecepcionDocumento(
+                    textStream, nombreArchivo, content.length(), ".txt", "text/plain", userId, clientIp
+            );
+
+            // 3. Retransmisión en Tiempo Real (Chat Global)
+            // Usamos tu BroadcastManager para enviarle el texto a todos los clientes que estén conectados
+            String mensajeRealTime = serializer.buildSuccessResponse(
+                    JsonSchema.ACTION_NEW_MESSAGE,
+                    "De " + fromUser + ": " + content
+            );
+            broadcastManager.broadcast(mensajeRealTime);
+
+            // 4. Le respondemos a quien lo envió que todo salió bien
+            return serializer.buildSuccessResponse(JsonSchema.ACTION_SEND_MESSAGE, "Mensaje procesado, encriptado y entregado.");
+
+        } catch (Exception e) {
+            logger.error("Error procesando mensaje de texto", e);
+            return serializer.buildErrorResponse("No se pudo enviar el mensaje.");
         }
     }
 }
