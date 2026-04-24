@@ -3789,3 +3789,226 @@ java.util.NoSuchElementException: No line found
 	at java.base/java.util.Scanner.nextLine(Scanner.java:1660)
 	at console.InteractiveConsole.run(InteractiveConsole.java:25)
 	at ServerApplication.main(ServerApplication.java:82)
+2026-04-23 23:23:17 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 23:23:19 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 23:23:19 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 23:23:19 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 23:23:19 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 23:23:38 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:53914
+2026-04-23 23:23:38 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:53914
+2026-04-23 23:23:52 [pool-1-thread-1] ERROR handler.ClientHandler - Conexión de CONTROL perdida con /192.168.1.4:53914
+2026-04-23 23:23:52 [pool-1-thread-1] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:53914 (User ID: 1)
+2026-04-23 23:24:46 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:57212
+2026-04-23 23:24:46 [pool-1-thread-2] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:57212
+2026-04-23 23:26:16 [pool-1-thread-2] ERROR handler.ClientHandler - Conexión de CONTROL perdida con /192.168.1.4:57212
+2026-04-23 23:26:16 [pool-1-thread-2] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:57212 (User ID: 1)
+2026-04-23 23:26:22 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:52838
+2026-04-23 23:26:22 [pool-1-thread-3] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:52838
+2026-04-23 23:27:43 [pool-1-thread-3] ERROR handler.ClientHandler - Conexión de CONTROL perdida con /192.168.1.4:52838
+2026-04-23 23:27:43 [pool-1-thread-3] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:52838 (User ID: 1)
+2026-04-23 23:27:49 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:62838
+2026-04-23 23:27:49 [pool-1-thread-4] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:62838
+2026-04-23 23:28:02 [pool-1-thread-4] ERROR MySqlRepository.MySqlDao - Error al registrar log en auditoría: DOWNLOAD_INIT - Detalles: Ticket de descarga (ORG) generado para ID: 14
+java.sql.SQLException: Data truncated for column 'action' at row 1
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:121)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:114)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.serverExecute(ServerPreparedStatement.java:612)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.executeInternal(ServerPreparedStatement.java:320)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1166)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1101)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1467)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:1084)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java)
+	at MySqlRepository.MySqlDao.registrarLog(MySqlDao.java:132)
+	at LogService.LogManager.registrarAccion(LogManager.java:13)
+	at RequestRouter.MainRouter.handleDownloadInit(MainRouter.java:227)
+	at RequestRouter.MainRouter.routeRequest(MainRouter.java:65)
+	at handler.ClientHandler.procesarJson(ClientHandler.java:83)
+	at handler.ClientHandler.run(ClientHandler.java:67)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-04-23 23:28:02 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-ORG-43d8d410-4db6-4769-8353-f6a905cabac4) desde /192.168.1.4:62840
+2026-04-23 23:28:02 [FileTransfer-DWN-ORG-] INFO  handler.FileTransferHandler - Enviando ARCHIVO ORIGINAL. Token: DWN-ORG-43d8d410-4db6-4769-8353-f6a905cabac4
+2026-04-23 23:28:03 [FileTransfer-DWN-ORG-] ERROR MySqlRepository.MySqlDao - Error al registrar log en auditoría: DOWNLOAD_COMPLETE - Detalles: Descarga finalizada en modo: ORIGINAL
+java.sql.SQLException: Data truncated for column 'action' at row 1
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:121)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:114)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.serverExecute(ServerPreparedStatement.java:612)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.executeInternal(ServerPreparedStatement.java:320)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1166)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1101)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1467)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:1084)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java)
+	at MySqlRepository.MySqlDao.registrarLog(MySqlDao.java:132)
+	at LogService.LogManager.registrarAccion(LogManager.java:13)
+	at handler.FileTransferHandler.run(FileTransferHandler.java:82)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-04-23 23:29:12 [pool-1-thread-4] ERROR MySqlRepository.MySqlDao - Error al registrar log en auditoría: DOWNLOAD_INIT - Detalles: Ticket de descarga (ORG) generado para ID: 14
+java.sql.SQLException: Data truncated for column 'action' at row 1
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:121)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:114)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.serverExecute(ServerPreparedStatement.java:612)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.executeInternal(ServerPreparedStatement.java:320)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1166)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1101)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1467)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:1084)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java)
+	at MySqlRepository.MySqlDao.registrarLog(MySqlDao.java:132)
+	at LogService.LogManager.registrarAccion(LogManager.java:13)
+	at RequestRouter.MainRouter.handleDownloadInit(MainRouter.java:227)
+	at RequestRouter.MainRouter.routeRequest(MainRouter.java:65)
+	at handler.ClientHandler.procesarJson(ClientHandler.java:83)
+	at handler.ClientHandler.run(ClientHandler.java:67)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-04-23 23:29:12 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-ORG-6e99c91e-aaab-43c4-91b3-2eb0443098e0) desde /192.168.1.4:62864
+2026-04-23 23:29:12 [FileTransfer-DWN-ORG-] INFO  handler.FileTransferHandler - Enviando ARCHIVO ORIGINAL. Token: DWN-ORG-6e99c91e-aaab-43c4-91b3-2eb0443098e0
+2026-04-23 23:29:12 [FileTransfer-DWN-ORG-] ERROR MySqlRepository.MySqlDao - Error al registrar log en auditoría: DOWNLOAD_COMPLETE - Detalles: Descarga finalizada en modo: ORIGINAL
+java.sql.SQLException: Data truncated for column 'action' at row 1
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:121)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:114)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.serverExecute(ServerPreparedStatement.java:612)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.executeInternal(ServerPreparedStatement.java:320)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1166)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1101)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1467)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:1084)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java)
+	at MySqlRepository.MySqlDao.registrarLog(MySqlDao.java:132)
+	at LogService.LogManager.registrarAccion(LogManager.java:13)
+	at handler.FileTransferHandler.run(FileTransferHandler.java:82)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-04-23 23:48:06 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 23:48:06 [main] INFO  MySqlRepository.DatabaseInitializer - Aplicando esquema de tablas desde schema.sql...
+2026-04-23 23:48:07 [main] INFO  MySqlRepository.SqlScriptRunner - Leyendo script SQL: schema.sql
+2026-04-23 23:48:08 [main] INFO  MySqlRepository.SqlScriptRunner - Script schema.sql ejecutado correctamente.
+2026-04-23 23:48:08 [main] INFO  MySqlRepository.DatabaseInitializer - Base de datos lista: Tablas creadas/actualizadas con éxito.
+2026-04-23 23:48:09 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 23:48:09 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 23:48:09 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 23:48:09 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 23:49:25 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:58000
+2026-04-23 23:49:25 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:58000
+2026-04-23 23:49:46 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: cdc13519-5742-430b-82a7-b6860f615197) desde /192.168.1.4:58014
+2026-04-23 23:49:46 [FileTransfer-cdc13519] INFO  handler.FileTransferHandler - Recibiendo archivo pesado. Token: cdc13519-5742-430b-82a7-b6860f615197
+2026-04-23 23:49:46 [FileTransfer-cdc13519] INFO  DocumentService.DocumentManager - 1. Guardando original en disco...
+2026-04-23 23:49:46 [FileTransfer-cdc13519] INFO  DocumentService.DocumentManager - 2. Generando Hash y cifrando...
+2026-04-23 23:49:46 [FileTransfer-cdc13519] INFO  CryptoService.CryptoManager - Iniciando Hash y Cifrado en un solo pase para: C:\Users\danie\Documents\messaging_project\messaging-server\.\storage\original\a1c0bbd3-2bd7-4fad-98fc-6c76649777e1.pptx
+2026-04-23 23:49:46 [FileTransfer-cdc13519] INFO  DocumentService.DocumentManager - 3. Guardando metadatos en MySQL...
+2026-04-23 23:49:46 [FileTransfer-cdc13519] INFO  DocumentService.DocumentManager - ¡Documento procesado al 100%! ID asignado: 1
+2026-04-23 23:50:16 [pool-1-thread-1] INFO  DocumentService.DocumentManager - 1. Guardando original en disco...
+2026-04-23 23:50:16 [pool-1-thread-1] INFO  DocumentService.DocumentManager - 2. Generando Hash y cifrando...
+2026-04-23 23:50:16 [pool-1-thread-1] INFO  CryptoService.CryptoManager - Iniciando Hash y Cifrado en un solo pase para: C:\Users\danie\Documents\messaging_project\messaging-server\.\storage\original\ff70838b-39ab-4e1e-8901-8276c4c2cdb9.txt
+2026-04-23 23:50:16 [pool-1-thread-1] INFO  DocumentService.DocumentManager - 3. Guardando metadatos en MySQL...
+2026-04-23 23:50:16 [pool-1-thread-1] INFO  DocumentService.DocumentManager - ¡Documento procesado al 100%! ID asignado: 2
+2026-04-23 23:50:31 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-ORG-6a1022be-f64c-4a2e-bdf1-f6b1e72d2c9f) desde /192.168.1.4:58026
+2026-04-23 23:50:31 [FileTransfer-DWN-ORG-] INFO  handler.FileTransferHandler - Enviando ARCHIVO ORIGINAL. Token: DWN-ORG-6a1022be-f64c-4a2e-bdf1-f6b1e72d2c9f
+2026-04-23 23:50:32 [FileTransfer-DWN-ORG-] ERROR MySqlRepository.MySqlDao - Error al registrar log en auditoría: DOWNLOAD_COMPLETE - Detalles: Descarga finalizada en modo: ORIGINAL
+java.sql.SQLIntegrityConstraintViolationException: Cannot add or update a child row: a foreign key constraint fails (`messaging_system`.`logs`, CONSTRAINT `fk_log_sender` FOREIGN KEY (`sender_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:109)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:114)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.serverExecute(ServerPreparedStatement.java:612)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.executeInternal(ServerPreparedStatement.java:320)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1166)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1101)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1467)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:1084)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java)
+	at MySqlRepository.MySqlDao.registrarLog(MySqlDao.java:146)
+	at LogService.LogManager.registrarAccion(LogManager.java:13)
+	at handler.FileTransferHandler.run(FileTransferHandler.java:82)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-04-23 23:50:50 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-ORG-5c43416c-8620-4b49-8555-bb7bb5601628) desde /192.168.1.4:58036
+2026-04-23 23:50:50 [FileTransfer-DWN-ORG-] INFO  handler.FileTransferHandler - Enviando ARCHIVO ORIGINAL. Token: DWN-ORG-5c43416c-8620-4b49-8555-bb7bb5601628
+2026-04-23 23:50:50 [FileTransfer-DWN-ORG-] ERROR MySqlRepository.MySqlDao - Error al registrar log en auditoría: DOWNLOAD_COMPLETE - Detalles: Descarga finalizada en modo: ORIGINAL
+java.sql.SQLIntegrityConstraintViolationException: Cannot add or update a child row: a foreign key constraint fails (`messaging_system`.`logs`, CONSTRAINT `fk_log_sender` FOREIGN KEY (`sender_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:109)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:114)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.serverExecute(ServerPreparedStatement.java:612)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.executeInternal(ServerPreparedStatement.java:320)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1166)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1101)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1467)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:1084)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java)
+	at MySqlRepository.MySqlDao.registrarLog(MySqlDao.java:146)
+	at LogService.LogManager.registrarAccion(LogManager.java:13)
+	at handler.FileTransferHandler.run(FileTransferHandler.java:82)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-04-23 23:51:05 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-HSH-618ac61a-e071-493f-8fa6-cb39dc8e98dd) desde /192.168.1.4:55240
+2026-04-23 23:51:05 [FileTransfer-DWN-HSH-] INFO  handler.FileTransferHandler - Enviando HASH. Token: DWN-HSH-618ac61a-e071-493f-8fa6-cb39dc8e98dd
+2026-04-23 23:51:05 [FileTransfer-DWN-HSH-] ERROR MySqlRepository.MySqlDao - Error al registrar log en auditoría: DOWNLOAD_COMPLETE - Detalles: Descarga finalizada en modo: HASH
+java.sql.SQLIntegrityConstraintViolationException: Cannot add or update a child row: a foreign key constraint fails (`messaging_system`.`logs`, CONSTRAINT `fk_log_sender` FOREIGN KEY (`sender_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:109)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:114)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.serverExecute(ServerPreparedStatement.java:612)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.executeInternal(ServerPreparedStatement.java:320)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1166)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1101)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1467)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:1084)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java)
+	at MySqlRepository.MySqlDao.registrarLog(MySqlDao.java:146)
+	at LogService.LogManager.registrarAccion(LogManager.java:13)
+	at handler.FileTransferHandler.run(FileTransferHandler.java:82)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-04-23 23:51:22 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-HSH-c9d95966-2f53-4513-93d7-76553b18a6a5) desde /192.168.1.4:62057
+2026-04-23 23:51:22 [FileTransfer-DWN-HSH-] INFO  handler.FileTransferHandler - Enviando HASH. Token: DWN-HSH-c9d95966-2f53-4513-93d7-76553b18a6a5
+2026-04-23 23:51:22 [FileTransfer-DWN-HSH-] ERROR MySqlRepository.MySqlDao - Error al registrar log en auditoría: DOWNLOAD_COMPLETE - Detalles: Descarga finalizada en modo: HASH
+java.sql.SQLIntegrityConstraintViolationException: Cannot add or update a child row: a foreign key constraint fails (`messaging_system`.`logs`, CONSTRAINT `fk_log_sender` FOREIGN KEY (`sender_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:109)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:114)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.serverExecute(ServerPreparedStatement.java:612)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.executeInternal(ServerPreparedStatement.java:320)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1166)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1101)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1467)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:1084)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java)
+	at MySqlRepository.MySqlDao.registrarLog(MySqlDao.java:146)
+	at LogService.LogManager.registrarAccion(LogManager.java:13)
+	at handler.FileTransferHandler.run(FileTransferHandler.java:82)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-04-23 23:53:41 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-ENC-845f9c89-bda5-4273-ae12-370ecaf6eb99) desde /192.168.1.4:52815
+2026-04-23 23:53:41 [FileTransfer-DWN-ENC-] INFO  handler.FileTransferHandler - Enviando ARCHIVO ENCRIPTADO. Token: DWN-ENC-845f9c89-bda5-4273-ae12-370ecaf6eb99
+2026-04-23 23:53:41 [FileTransfer-DWN-ENC-] ERROR MySqlRepository.MySqlDao - Error al registrar log en auditoría: DOWNLOAD_COMPLETE - Detalles: Descarga finalizada en modo: ENCRIPTADO
+java.sql.SQLIntegrityConstraintViolationException: Cannot add or update a child row: a foreign key constraint fails (`messaging_system`.`logs`, CONSTRAINT `fk_log_sender` FOREIGN KEY (`sender_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:109)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:114)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.serverExecute(ServerPreparedStatement.java:612)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.executeInternal(ServerPreparedStatement.java:320)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1166)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1101)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1467)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:1084)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java)
+	at MySqlRepository.MySqlDao.registrarLog(MySqlDao.java:146)
+	at LogService.LogManager.registrarAccion(LogManager.java:13)
+	at handler.FileTransferHandler.run(FileTransferHandler.java:82)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-04-23 23:54:23 [pool-1-thread-1] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:58000 (User ID: 1)
+2026-04-23 23:54:24 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:52821
+2026-04-23 23:54:24 [pool-1-thread-2] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:52821
+2026-04-23 23:55:06 [pool-1-thread-2] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:52821 (User ID: 1)
+2026-04-23 23:56:13 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:64160
+2026-04-23 23:56:13 [pool-1-thread-3] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:64160
+2026-04-23 23:56:31 [pool-1-thread-3] ERROR handler.ClientHandler - Conexión de CONTROL perdida con /192.168.1.4:64160
+2026-04-23 23:56:31 [pool-1-thread-3] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:64160 (User ID: 1)
+2026-04-23 23:57:04 [main] ERROR ServerApplication - Error crítico durante el arranque del servidor.
+java.util.NoSuchElementException: No line found
+	at java.base/java.util.Scanner.nextLine(Scanner.java:1660)
+	at console.InteractiveConsole.run(InteractiveConsole.java:25)
+	at ServerApplication.main(ServerApplication.java:83)

@@ -22,21 +22,24 @@ public class FileTransferHandler implements Runnable {
     private final DocumentManager documentManager;
     private final MainRouter router;
     private final BroadcastManager broadcastManager;
+    private final LogService.LogManager logManager;
 
-    public FileTransferHandler(Socket socket, String token, TransferManager transferManager, 
-                               DocumentManager documentManager, MainRouter router, BroadcastManager broadcastManager) {
+    public FileTransferHandler(Socket socket, String token, TransferManager transferManager,
+            DocumentManager documentManager, MainRouter router, BroadcastManager broadcastManager, 
+            LogService.LogManager logManager) {
         this.socket = socket;
         this.token = token;
         this.transferManager = transferManager;
         this.documentManager = documentManager;
         this.router = router;
         this.broadcastManager = broadcastManager;
+        this.logManager = logManager;
     }
 
     @Override
     public void run() {
         try (InputStream in = socket.getInputStream();
-             OutputStream out = socket.getOutputStream()) {
+                OutputStream out = socket.getOutputStream()) {
 
             TransferTicket ticket = transferManager.validarYConsumirTicket(token);
 
@@ -47,37 +50,49 @@ public class FileTransferHandler implements Runnable {
 
             if (token.startsWith("DWN-")) {
                 // --- MODO DESCARGA ---
+                long docIdToLog = 0;
+                String mode = "NORMAL";
+
                 if (token.startsWith("DWN-ORG-")) {
                     logger.info("Enviando ARCHIVO ORIGINAL. Token: {}", token);
-                    long docId = Long.parseLong(ticket.mimeType);
-                    documentManager.enviarDocumentoOriginal(docId, out);
+                    docIdToLog = Long.parseLong(ticket.mimeType);
+                    documentManager.enviarDocumentoOriginal(docIdToLog, out);
+                    mode = "ORIGINAL";
 
                 } else if (token.startsWith("DWN-ENC-")) {
                     logger.info("Enviando ARCHIVO ENCRIPTADO. Token: {}", token);
-                    long docId = Long.parseLong(ticket.mimeType);
-                    documentManager.enviarDocumentoEncriptado(docId, out);
+                    docIdToLog = Long.parseLong(ticket.mimeType);
+                    documentManager.enviarDocumentoEncriptado(docIdToLog, out);
+                    mode = "ENCRIPTADO";
 
                 } else if (token.startsWith("DWN-HSH-")) {
                     logger.info("Enviando HASH. Token: {}", token);
-                    long docId = Long.parseLong(ticket.mimeType);
-                    documentManager.enviarDocumentoHash(docId, out);
+                    docIdToLog = Long.parseLong(ticket.mimeType);
+                    documentManager.enviarDocumentoHash(docIdToLog, out);
+                    mode = "HASH";
 
                 } else {
                     logger.info("Enviando ARCHIVO DESCIFRADO. Token: {}", token);
                     String encryptedPath = ticket.mimeType;
                     documentManager.enviarDocumentoAlCliente(encryptedPath, out);
+                    mode = "DESCIFRADO";
                 }
+
+                // LOG DESCARGA EXITOSA
+                logManager.registrarAccion(docIdToLog > 0 ? docIdToLog : null, 0, "DOWNLOAD_COMPLETE", "SUCCESS", "Descarga finalizada en modo: " + mode);
+                broadcastManager.broadcast(router.handleListLogs());
+
             } else {
                 // --- MODO SUBIDA ---
                 logger.info("Recibiendo archivo pesado. Token: {}", token);
                 boolean exito = documentManager.procesarRecepcionDocumento(
                         in, ticket.filename, ticket.sizeBytes, ticket.extension,
-                        ticket.mimeType, ticket.ownerUserId, ticket.ownerIp, "FILE"
-                );
+                        ticket.mimeType, ticket.ownerUserId, ticket.ownerIp, "FILE");
 
                 if (exito) {
                     broadcastManager.broadcast(router.handleListDocuments());
                     broadcastManager.broadcast(router.handleListMessages());
+                    broadcastManager.broadcast(router.handleListLogs());
                 }
 
                 String status = exito ? "{\"status\":\"UPLOAD_SUCCESS\"}\n" : "{\"status\":\"UPLOAD_FAILED\"}\n";
@@ -89,8 +104,10 @@ public class FileTransferHandler implements Runnable {
             logger.error("Error en transferencia de archivo para el token: {}", token, e);
         } finally {
             try {
-                if (!socket.isClosed()) socket.close();
-            } catch (Exception ignored) {}
+                if (!socket.isClosed())
+                    socket.close();
+            } catch (Exception ignored) {
+            }
         }
     }
 }

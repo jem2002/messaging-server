@@ -98,8 +98,7 @@ public class MainRouter {
 
         // Registrar Log
         logManager.registrarAccion(null, userId, "CONNECT", "SUCCESS",
-                "Usuario conectado desde " + ipAddress + ":" + port);
-
+                "Usuario " + username + " conectado desde " + ipAddress + ":" + port);
 
         return serializer.buildSuccessResponse(JsonSchema.ACTION_CONNECT, "Usuario ID: " + userId);
     }
@@ -126,8 +125,9 @@ public class MainRouter {
             long userId = userManager.desconectarPorCaidaDeRed(ipAddress, port);
 
             // LOG Y BROADCAST DE LOGS
+            String username = userManager.obtenerNombreUsuario(userId);
             logManager.registrarAccion(null, userId, "DISCONNECT", "SUCCESS",
-                    "Desconexión física: " + ipAddress + ":" + port);
+                    "Desconexión física del usuario " + username + " (" + ipAddress + ":" + port + ")");
             broadcastManager.broadcast(handleListLogs());
 
             // 2. AVISAR A TODOS QUE ALGUIEN SALIÓ (Aquí es donde debía ir)
@@ -149,7 +149,7 @@ public class MainRouter {
         return serializer.buildListResponse(JsonSchema.ACTION_LIST_MESSAGES, msgs, "mensajes");
     }
 
-    private String handleListLogs() {
+    public  String handleListLogs() {
         List<Map<String, String>> logs = logManager.listarLogs();
         return serializer.buildListResponse(JsonSchema.ACTION_LIST_LOGS, logs, "logs");
     }
@@ -174,6 +174,8 @@ public class MainRouter {
             TransferTicket ticket = new TransferTicket(token, filename, size, extension, mimeType, userId, clientIp);
             transferManager.registrarTicket(ticket);
 
+            // LOG Y BROADCAST
+            logManager.registrarAccion(null, userId, "UPLOAD_INIT", "SUCCESS", "Ticket de subida generado para " + username + " (Archivo: " + filename + ")");
             broadcastManager.broadcast(handleListLogs());
 
             // Responder al cliente con su ticket
@@ -188,6 +190,9 @@ public class MainRouter {
     private String handleDownloadInit(JsonNode payload, String clientIp) {
         try {
             long docId = payload.get("document_id").asLong();
+            String username = payload.has("username") ? payload.get("username").asText() : "UsuarioDesconocido";
+            long userId = 0;
+            try { userId = userManager.obtenerIdUsuario(username); } catch (Exception ignore) {}
 
             // Buscar los detalles
             Map<String, String> detalles = documentManager.obtenerDetallesDescarga(docId);
@@ -217,10 +222,14 @@ public class MainRouter {
             // ¡IMPORTANTE! Le ponemos el prefijo adecuado para distinguirlo
             String token = prefix + java.util.UUID.randomUUID().toString();
 
-            // Reutilizamos TransferTicket. En mimeType guardamos encryptedPath o el docId según el modo
-            TransferTicket ticket = new TransferTicket(token, filename, size, "", ticketInfo, 0, clientIp);
+            // Reutilizamos TransferTicket. En mimeType guardamos encryptedPath o el docId
+            // según el modo. También guardamos userId en vez de 0.
+            TransferTicket ticket = new TransferTicket(token, filename, size, "", ticketInfo, userId, clientIp);
             transferManager.registrarTicket(ticket);
 
+            // LOG Y BROADCAST
+            logManager.registrarAccion(docId, userId, "DOWNLOAD_INIT", "SUCCESS", "Ticket de descarga (" + format + ") generado para " + username + " (ID doc: " + docId + ")");
+            broadcastManager.broadcast(handleListLogs());
 
             return serializer.buildDownloadInitResponse(token, size, docId);
 

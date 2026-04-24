@@ -168,7 +168,10 @@ CREATE TABLE logs (
     document_id      BIGINT,                                   -- Nullable para SET NULL
     sender_user_id   BIGINT   NOT NULL,
     receiver_user_id BIGINT,                                   -- Nullable para SET NULL
-    action           ENUM('SEND','RECEIVE','HASH','ENCRYPT','DECRYPT','CONNECT','DISCONNECT') NOT NULL,
+    action           ENUM(
+        'CONNECT', 'DISCONNECT', 'SEND_MESSAGE', 
+        'UPLOAD_INIT', 'UPLOAD_COMPLETE', 'DOWNLOAD_INIT', 'DOWNLOAD_COMPLETE'
+    ) NOT NULL,
     protocol         ENUM('TCP','UDP'),
     timestamp        DATETIME DEFAULT CURRENT_TIMESTAMP,
     status           ENUM('SUCCESS','FAILED','IN_PROGRESS') NOT NULL,

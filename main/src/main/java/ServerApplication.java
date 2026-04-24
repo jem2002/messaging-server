@@ -40,13 +40,13 @@ public class ServerApplication {
             ServerConfig config = new ServerConfig();
 
             // 2. Módulo Persistencia
-            //DatabaseInitializer.initializeSchema();
+            DatabaseInitializer.initializeSchema();
             MySqlDao dao = new MySqlDao();
             dao.limpiarConexionesMuertas();
 
             // 3. Módulo Servicios
             UserManager userManager = new UserManager(dao);
-         //   StorageManager storageManager = new StorageManager();
+            // StorageManager storageManager = new StorageManager();
             LocalFileManager fileManager = new LocalFileManager();
             CryptoManager cryptoManager = new CryptoManager();
             LogManager logManager = new LogManager(dao);
@@ -54,7 +54,8 @@ public class ServerApplication {
             BroadcastManager broadcastManager = new BroadcastManager();
             TransferManager transferManager = new TransferManager();
             // 4. Módulo Protocolo
-            MainRouter router = new MainRouter(userManager, documentManager, logManager, broadcastManager, transferManager);
+            MainRouter router = new MainRouter(userManager, documentManager, logManager, broadcastManager,
+                    transferManager);
 
             // 5. Módulo Gestión de Conexiones
             int maxConnections = config.getMaxConnections();
@@ -70,9 +71,9 @@ public class ServerApplication {
                     threadPool,
                     router,
                     broadcastManager,
-                    transferManager, // <-- PASARLO AQUÍ
-                    documentManager
-            );
+                    transferManager,
+                    documentManager,
+                    logManager);
 
             // 7. Interfaces Expuestas y Consola Administrativa
             ServerAdminAPI adminAPI = new ServerAdminAPI(dao);

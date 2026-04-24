@@ -150,7 +150,8 @@ public class DocumentManager {
             dao.registrarCifradoDocumento(docId, "AES256", cryptoResult.getFinalEncryptedPath(), "SERVER_STATIC_KEY");
 
             // 4. Registrar en la bitácora de auditoría (logs)
-            logManager.registrarAccion(docId, ownerUserId, "RECEIVE", "SUCCESS", "Archivo guardado, hasheado y cifrado.");
+            String username = dao.obtenerNombreUsuario(ownerUserId);
+            logManager.registrarAccion(docId, ownerUserId, "UPLOAD_COMPLETE", "SUCCESS", "Archivo subido exitosamente por: " + username);
 
             logger.info("¡Documento procesado al 100%! ID asignado: {}", docId);
             return true;
@@ -158,7 +159,10 @@ public class DocumentManager {
         } catch (Exception e) {
             logger.error("Error crítico procesando el documento.", e);
             if (ownerUserId > 0) {
-                logManager.registrarAccion(docId, ownerUserId, "RECEIVE", "FAILED", "Error: " + e.getMessage());
+                try {
+                    String username = dao.obtenerNombreUsuario(ownerUserId);
+                    logManager.registrarAccion(docId, ownerUserId, "UPLOAD_COMPLETE", "FAILED", "Fallo al subir por " + username + ". Error: " + e.getMessage());
+                } catch (Exception ignore) {}
             }
             return false;
         }

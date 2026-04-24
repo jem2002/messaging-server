@@ -46,4 +46,12 @@ public class UserManager {
     public long obtenerIdUsuario(String username) throws Exception {
         return dao.obtenerIdUsuarioPorUsername(username);
     }
+    public String obtenerNombreUsuario(long userId) {
+        try {
+            return dao.obtenerNombreUsuario(userId);
+        } catch (Exception e) {
+            logger.error("Error al obtener nombre de usuario", e);
+            return "UsuarioDesconocido";
+        }
+    }
 }

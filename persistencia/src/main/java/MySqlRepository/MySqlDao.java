@@ -50,6 +50,20 @@ public class MySqlDao {
         }
     }
 
+    public String obtenerNombreUsuario(long userId) throws Exception {
+        String sql = "SELECT username FROM users WHERE id = ?";
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("username");
+                }
+            }
+        }
+        return "UsuarioDesconocido";
+    }
+
     // 1. Guardar el Documento principal
     public long registrarDocumento(String name, long sizeBytes, String extension, String mimeType,
             String docType, String originalPath, long ownerUserId, String ownerIp) throws Exception {

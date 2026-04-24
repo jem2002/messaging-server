@@ -30,10 +30,12 @@ public class TCPSocketServer implements Runnable {
     // 1. NUEVOS ATRIBUTOS
     private final TransferManager transferManager;
     private final DocumentManager documentManager;
+    private final LogService.LogManager logManager;
 
     // 2. PEDIRLOS EN EL CONSTRUCTOR
     public TCPSocketServer(int port, IConnectionPool pool, ThreadPoolManager threadPool, MainRouter router,
-                           BroadcastManager broadcastManager, TransferManager transferManager, DocumentManager documentManager) {
+            BroadcastManager broadcastManager, TransferManager transferManager, DocumentManager documentManager, 
+            LogService.LogManager logManager) {
         this.port = port;
         this.pool = pool;
         this.threadPool = threadPool;
@@ -42,6 +44,7 @@ public class TCPSocketServer implements Runnable {
         this.broadcastManager = broadcastManager;
         this.transferManager = transferManager;
         this.documentManager = documentManager;
+        this.logManager = logManager;
     }
 
     public void stopServer() {
@@ -67,13 +70,15 @@ public class TCPSocketServer implements Runnable {
                 logger.debug("Nueva conexión TCP entrante desde {}", clientSocket.getRemoteSocketAddress());
 
                 // 2. Triage: Leer la primera línea para saber qué tipo de conexión es
-                // Usamos un pequeño timeout para que no bloquee el server si alguien conecta y no manda nada
-                clientSocket.setSoTimeout(5000); 
+                // Usamos un pequeño timeout para que no bloquee el server si alguien conecta y
+                // no manda nada
+                clientSocket.setSoTimeout(5000);
                 String primeraLinea;
                 try {
                     primeraLinea = leerLinea(clientSocket.getInputStream());
                 } catch (Exception e) {
-                    logger.warn("Error leyendo primera línea de {}, cerrando socket.", clientSocket.getRemoteSocketAddress());
+                    logger.warn("Error leyendo primera línea de {}, cerrando socket.",
+                            clientSocket.getRemoteSocketAddress());
                     clientSocket.close();
                     continue;
                 }
@@ -87,7 +92,7 @@ public class TCPSocketServer implements Runnable {
                 if (primeraLinea.startsWith("{")) {
                     // =============== MODO CONTROL (JSON) ===============
                     logger.info("Detectada conexión de CONTROL desde {}", clientSocket.getRemoteSocketAddress());
-                    
+
                     PooledClientConnection pooledConnection = pool.acquire();
                     if (pooledConnection == null) {
                         logger.warn("Rechazando conexión de control: Pool agotado.");
@@ -97,16 +102,20 @@ public class TCPSocketServer implements Runnable {
 
                     pooledConnection.setSocket(clientSocket);
                     // Usamos el handler de control (en el pool)
-                    ClientHandler handler = new ClientHandler(pooledConnection, pool, router, this.broadcastManager, this.transferManager, this.documentManager, primeraLinea);
+                    ClientHandler handler = new ClientHandler(pooledConnection, pool, router, this.broadcastManager,
+                            this.transferManager, this.documentManager, primeraLinea);
                     threadPool.execute(handler);
 
                 } else {
                     // =============== MODO ARCHIVO (TOKEN) ===============
-                    logger.info("Detectada conexión de ARCHIVO (Token: {}) desde {}", primeraLinea, clientSocket.getRemoteSocketAddress());
-                    
+                    logger.info("Detectada conexión de ARCHIVO (Token: {}) desde {}", primeraLinea,
+                            clientSocket.getRemoteSocketAddress());
+
                     // Para archivos usamos hilos del sistema (no del pool) como se solicitó
-                    FileTransferHandler fileHandler = new FileTransferHandler(clientSocket, primeraLinea, transferManager, documentManager, router, broadcastManager);
-                    new Thread(fileHandler, "FileTransfer-" + primeraLinea.substring(0, Math.min(8, primeraLinea.length()))).start();
+                    FileTransferHandler fileHandler = new FileTransferHandler(clientSocket, primeraLinea,
+                            transferManager, documentManager, router, broadcastManager, logManager);
+                    new Thread(fileHandler,
+                            "FileTransfer-" + primeraLinea.substring(0, Math.min(8, primeraLinea.length()))).start();
                 }
             }
         } catch (IOException e) {
@@ -124,10 +133,13 @@ public class TCPSocketServer implements Runnable {
         java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
         int c;
         while ((c = in.read()) != -1) {
-            if (c == '\n') break;
-            if (c != '\r') baos.write(c);
+            if (c == '\n')
+                break;
+            if (c != '\r')
+                baos.write(c);
         }
-        if (c == -1 && baos.size() == 0) return null;
+        if (c == -1 && baos.size() == 0)
+            return null;
         return baos.toString(java.nio.charset.StandardCharsets.UTF_8.name()).trim();
     }
 }
