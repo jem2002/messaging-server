@@ -3742,3 +3742,50 @@ java.util.NoSuchElementException: No line found
 	at java.base/java.util.Scanner.nextLine(Scanner.java:1660)
 	at console.InteractiveConsole.run(InteractiveConsole.java:25)
 	at ServerApplication.main(ServerApplication.java:82)
+2026-04-23 22:59:41 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 22:59:44 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 22:59:44 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 22:59:44 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 22:59:44 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 22:59:45 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:56361
+2026-04-23 22:59:45 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:56361
+2026-04-23 22:59:57 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-ORG-8b1595a4-815f-4785-ab08-056f695ab368) desde /192.168.1.4:56367
+2026-04-23 22:59:57 [FileTransfer-DWN-ORG-] INFO  handler.FileTransferHandler - Enviando ARCHIVO ORIGINAL. Token: DWN-ORG-8b1595a4-815f-4785-ab08-056f695ab368
+2026-04-23 23:00:08 [pool-1-thread-1] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:56361 (User ID: 1)
+2026-04-23 23:06:01 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 23:06:04 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 23:06:04 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 23:06:04 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 23:06:04 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 23:06:10 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:51937
+2026-04-23 23:06:10 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:51937
+2026-04-23 23:06:14 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-HSH-3e662ecf-296e-497f-a18d-3e0aa7563325) desde /192.168.1.4:51938
+2026-04-23 23:06:14 [FileTransfer-DWN-HSH-] INFO  handler.FileTransferHandler - Enviando HASH. Token: DWN-HSH-3e662ecf-296e-497f-a18d-3e0aa7563325
+2026-04-23 23:06:18 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-ENC-e56b1082-a834-4e9a-8411-80ce676513f0) desde /192.168.1.4:51939
+2026-04-23 23:06:18 [FileTransfer-DWN-ENC-] INFO  handler.FileTransferHandler - Enviando ARCHIVO ENCRIPTADO. Token: DWN-ENC-e56b1082-a834-4e9a-8411-80ce676513f0
+2026-04-23 23:06:37 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-HSH-899a4ff9-c0f7-4488-8bb8-b18923101c98) desde /192.168.1.4:59257
+2026-04-23 23:06:37 [FileTransfer-DWN-HSH-] INFO  handler.FileTransferHandler - Enviando HASH. Token: DWN-HSH-899a4ff9-c0f7-4488-8bb8-b18923101c98
+2026-04-23 23:11:39 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-HSH-e6ef1b09-3b61-4659-a131-4bac7e9122d0) desde /192.168.1.4:61028
+2026-04-23 23:11:39 [FileTransfer-DWN-HSH-] INFO  handler.FileTransferHandler - Enviando HASH. Token: DWN-HSH-e6ef1b09-3b61-4659-a131-4bac7e9122d0
+2026-04-23 23:14:34 [pool-1-thread-1] ERROR handler.ClientHandler - Conexión de CONTROL perdida con /192.168.1.4:51937
+2026-04-23 23:14:34 [pool-1-thread-1] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:51937 (User ID: 1)
+2026-04-23 23:14:43 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 23:14:46 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 23:14:46 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 23:14:46 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 23:14:46 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 23:14:48 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:57229
+2026-04-23 23:14:48 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:57229
+2026-04-23 23:14:57 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-HSH-272c52e4-e8f4-4f6d-bb8f-c803a78b9849) desde /192.168.1.4:57234
+2026-04-23 23:14:57 [FileTransfer-DWN-HSH-] INFO  handler.FileTransferHandler - Enviando HASH. Token: DWN-HSH-272c52e4-e8f4-4f6d-bb8f-c803a78b9849
+2026-04-23 23:15:02 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-HSH-3d07b42e-c3b3-419b-b340-c3087243c56e) desde /192.168.1.4:57237
+2026-04-23 23:15:02 [FileTransfer-DWN-HSH-] INFO  handler.FileTransferHandler - Enviando HASH. Token: DWN-HSH-3d07b42e-c3b3-419b-b340-c3087243c56e
+2026-04-23 23:15:05 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-ENC-fd2dc35d-f248-413f-a878-ade7a8427b70) desde /192.168.1.4:57239
+2026-04-23 23:15:05 [FileTransfer-DWN-ENC-] INFO  handler.FileTransferHandler - Enviando ARCHIVO ENCRIPTADO. Token: DWN-ENC-fd2dc35d-f248-413f-a878-ade7a8427b70
+2026-04-23 23:15:39 [pool-1-thread-1] ERROR handler.ClientHandler - Conexión de CONTROL perdida con /192.168.1.4:57229
+2026-04-23 23:15:39 [pool-1-thread-1] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:57229 (User ID: 1)
+2026-04-23 23:16:33 [main] ERROR ServerApplication - Error crítico durante el arranque del servidor.
+java.util.NoSuchElementException: No line found
+	at java.base/java.util.Scanner.nextLine(Scanner.java:1660)
+	at console.InteractiveConsole.run(InteractiveConsole.java:25)
+	at ServerApplication.main(ServerApplication.java:82)

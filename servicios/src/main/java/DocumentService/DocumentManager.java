@@ -100,6 +100,7 @@ public class DocumentManager {
 
             for (Map<String, String> item : crudo) {
                 Map<String, String> msg = new java.util.HashMap<>();
+                msg.put("id", item.get("id")); // Agregamos el ID
                 msg.put("propietario", item.get("propietario"));
 
                 // Intentar leer el contenido del archivo .txt
