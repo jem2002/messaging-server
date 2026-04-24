@@ -9,6 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,16 +36,52 @@ public class DocumentManager {
         return dao.obtenerDetallesDescarga(documentId);
     }
 
-    // 2. Método puente para desencriptar y enviar (Para el Handler)
-    // Asegúrate de tener: import java.io.OutputStream; arriba
+    // 2. Método puente para desencriptar y enviar (Para el Handler - DESCARGA NORMAL)
     public void enviarDocumentoAlCliente(String encryptedPath, java.io.OutputStream out) throws Exception {
         cryptoManager.desencriptarYEnviarAlSocket(encryptedPath, out);
+    }
+
+    public void enviarDocumentoOriginal(long documentId, OutputStream out) throws Exception {
+        String path = dao.obtenerRutaOriginal(documentId);
+        Files.copy(Paths.get(path), out);
+        out.flush();
+    }
+
+    public void enviarDocumentoEncriptado(long documentId, OutputStream out) throws Exception {
+        Map<String, String> detalles = dao.obtenerDetallesDescarga(documentId);
+        String path = detalles.get("ruta_cifrada");
+        Files.copy(Paths.get(path), out);
+        out.flush();
+    }
+
+    public void enviarDocumentoHash(long documentId, OutputStream out) throws Exception {
+        String hash = dao.obtenerHashValue(documentId);
+        out.write(hash.getBytes(StandardCharsets.UTF_8));
+        out.flush();
     }
     public List<Map<String, String>> obtenerDocumentosDisponibles() {
         try {
             return dao.listarDocumentosDisponibles();
         } catch (Exception e) {
             logger.error("Error al obtener la lista de documentos de la BD", e);
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Map<String, String>> obtenerArchivosDisponibles() {
+        try {
+            return dao.listarArchivosDisponibles();
+        } catch (Exception e) {
+            logger.error("Error al obtener la lista de archivos de la BD", e);
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Map<String, String>> obtenerMensajesDisponibles() {
+        try {
+            return dao.listarMensajesDisponibles();
+        } catch (Exception e) {
+            logger.error("Error al obtener la lista de mensajes de la BD", e);
             return new ArrayList<>();
         }
     }

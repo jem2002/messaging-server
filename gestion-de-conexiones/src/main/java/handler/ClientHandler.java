@@ -66,7 +66,7 @@ public class ClientHandler implements Runnable {
 
                     if (ticket != null) {
                         if (token.startsWith("DWN-")) {
-                            // --- LA NUEVA LÓGICA DE DESCARGA ---
+                            // --- LÓGICA DE DESCARGA ---
                             logger.info("Iniciando envío de archivo pesado al cliente. Token: {}", token);
                             String encryptedPath = ticket.mimeType; // Donde guardamos la ruta temporalmente
 
@@ -74,12 +74,17 @@ public class ClientHandler implements Runnable {
                             documentManager.enviarDocumentoAlCliente(encryptedPath, out);
 
                         } else {
-                            // --- LÓGICA ACTUAL DE SUBIDA (UPL) ---
+                            // --- LÓGICA DE SUBIDA (UPL) ---
                             logger.info("Iniciando recepción de archivo pesado. Token: {}", token);
                             boolean exito = documentManager.procesarRecepcionDocumento(
                                     in, ticket.filename, ticket.sizeBytes, ticket.extension,
                                     ticket.mimeType, ticket.ownerUserId, ticket.ownerIp
                             );
+                            
+                            if (exito) {
+                                broadcastManager.broadcast(router.handleListDocuments());
+                            }
+
                             String status = exito ? "{\"status\":\"UPLOAD_SUCCESS\"}\n" : "{\"status\":\"UPLOAD_FAILED\"}\n";
                             out.write(status.getBytes(StandardCharsets.UTF_8));
                             out.flush();
@@ -93,7 +98,7 @@ public class ClientHandler implements Runnable {
         } catch (Exception e) {
             logger.error("Conexión perdida con {}", clientIp);
         } finally {
-            router.notificarDesconexionFisica(clientIp);
+            router.notificarDesconexionFisica(clientIp, out);
             if (out != null) broadcastManager.removeStream(out);
             pool.release(connection);
         }

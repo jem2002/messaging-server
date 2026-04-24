@@ -1,4 +1,5 @@
 package RequestRouter;
+
 import JsonSchema.JsonSchema;
 import LogService.LogManager;
 import DocumentService.DocumentManager;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +27,9 @@ public class MainRouter {
     private final LogManager logManager;
     private final TransferManager transferManager;
 
-    public MainRouter(UserManager userManager, DocumentManager documentManager, LogManager logManager, BroadcastManager broadcastManager, TransferManager transferManager) {      this.parser = new JsonInputParser();
+    public MainRouter(UserManager userManager, DocumentManager documentManager, LogManager logManager,
+            BroadcastManager broadcastManager, TransferManager transferManager) {
+        this.parser = new JsonInputParser();
         this.serializer = new ResponseBuilder();
         this.userManager = userManager;
         this.documentManager = documentManager;
@@ -50,6 +54,8 @@ public class MainRouter {
                 // Futuros endpoints irán aquí
                 case JsonSchema.ACTION_LIST_DOCUMENTS:
                     return handleListDocuments();
+                case JsonSchema.ACTION_LIST_MESSAGES:
+                    return handleListMessages();
                 case JsonSchema.ACTION_LIST_LOGS:
                     return handleListLogs();
                 // 1. Añadir al switch dentro de routeRequest:
@@ -91,11 +97,9 @@ public class MainRouter {
         long userId = userManager.conectarUsuario(username, ipAddress, port);
 
         // Registrar Log
-        logManager.registrarAccion(null, userId, "CONNECT", "SUCCESS", "Usuario conectado desde " + ipAddress + ":" + port);
+        logManager.registrarAccion(null, userId, "CONNECT", "SUCCESS",
+                "Usuario conectado desde " + ipAddress + ":" + port);
 
-       
-        broadcastManager.broadcast(handleListClients());
-        broadcastManager.broadcast(handleListLogs());
 
         return serializer.buildSuccessResponse(JsonSchema.ACTION_CONNECT, "Usuario ID: " + userId);
     }
@@ -105,9 +109,11 @@ public class MainRouter {
         return serializer.buildListResponse(JsonSchema.ACTION_LIST_CLIENTS, activos, "clientes");
     }
 
-    public void notificarDesconexionFisica(String rawClientIp) {
+    public void notificarDesconexionFisica(String rawClientIp, OutputStream out) {
         try {
             String cleanIp = rawClientIp.replace("/", "");
+            if (out != null)
+                broadcastManager.removeStream(out);
             String ipAddress = cleanIp;
             int port = 0;
             if (cleanIp.contains(":")) {
@@ -120,7 +126,8 @@ public class MainRouter {
             long userId = userManager.desconectarPorCaidaDeRed(ipAddress, port);
 
             // LOG Y BROADCAST DE LOGS
-            logManager.registrarAccion(null, userId, "DISCONNECT", "SUCCESS", "Desconexión física: " + ipAddress + ":" + port);
+            logManager.registrarAccion(null, userId, "DISCONNECT", "SUCCESS",
+                    "Desconexión física: " + ipAddress + ":" + port);
             broadcastManager.broadcast(handleListLogs());
 
             // 2. AVISAR A TODOS QUE ALGUIEN SALIÓ (Aquí es donde debía ir)
@@ -132,10 +139,14 @@ public class MainRouter {
         }
     }
 
-    private String handleListDocuments() {
-        List<Map<String, String>> docs = documentManager.obtenerDocumentosDisponibles();
-        // Usamos el mismo método del serializador, pero le pasamos la lista de docs y le llamamos "documentos"
+    public String handleListDocuments() {
+        List<Map<String, String>> docs = documentManager.obtenerArchivosDisponibles();
         return serializer.buildListResponse(JsonSchema.ACTION_LIST_DOCUMENTS, docs, "documentos");
+    }
+
+    public String handleListMessages() {
+        List<Map<String, String>> msgs = documentManager.obtenerMensajesDisponibles();
+        return serializer.buildListResponse(JsonSchema.ACTION_LIST_MESSAGES, msgs, "mensajes");
     }
 
     private String handleListLogs() {
@@ -143,7 +154,8 @@ public class MainRouter {
         return serializer.buildListResponse(JsonSchema.ACTION_LIST_LOGS, logs, "logs");
     }
 
-    // 2. Crear el método (necesitarás inyectar TransferManager en el constructor del router):
+    // 2. Crear el método (necesitarás inyectar TransferManager en el constructor
+    // del router):
     private String handleUploadInit(JsonNode payload, String clientIp) {
         try {
             String filename = payload.get("filename").asText();
@@ -162,8 +174,6 @@ public class MainRouter {
             TransferTicket ticket = new TransferTicket(token, filename, size, extension, mimeType, userId, clientIp);
             transferManager.registrarTicket(ticket);
 
-            // LOG Y BROADCAST DE LOGS
-            logManager.registrarAccion(null, userId, "UPLOAD_INIT", "SUCCESS", "Ticket de subida: " + filename);
             broadcastManager.broadcast(handleListLogs());
 
             // Responder al cliente con su ticket
@@ -188,12 +198,12 @@ public class MainRouter {
             // ¡IMPORTANTE! Le ponemos el prefijo DWN- para distinguirlo de las subidas
             String token = "DWN-" + java.util.UUID.randomUUID().toString();
 
-            // Reutilizamos TransferTicket (puedes pasarle el encryptedPath en el campo 'mimeType' o añadir un campo nuevo)
+            // Reutilizamos TransferTicket (puedes pasarle el encryptedPath en el campo
+            // 'mimeType' o añadir un campo nuevo)
             TransferTicket ticket = new TransferTicket(token, filename, size, "", encryptedPath, 0, clientIp);
             transferManager.registrarTicket(ticket);
 
             // LOG Y BROADCAST DE LOGS
-            logManager.registrarAccion(docId, 0, "DOWNLOAD_INIT", "SUCCESS", "Ticket de descarga para DocID: " + docId);
             broadcastManager.broadcast(handleListLogs());
 
             return serializer.buildSuccessResponse("DOWNLOAD_INIT", token);
@@ -212,24 +222,26 @@ public class MainRouter {
             // 1. Obtenemos el ID del remitente
             long userId = userManager.obtenerIdUsuario(fromUser);
 
-            // 2. EL TRUCO ARQUITECTÓNICO: Convertimos el String de texto en un flujo de bytes (InputStream)
-            java.io.InputStream textStream = new java.io.ByteArrayInputStream(content.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            // 2. EL TRUCO ARQUITECTÓNICO: Convertimos el String de texto en un flujo de
+            // bytes (InputStream)
+            java.io.InputStream textStream = new java.io.ByteArrayInputStream(
+                    content.getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
             // Le inventamos un nombre de archivo único
             String nombreArchivo = "msg_" + fromUser + "_" + System.currentTimeMillis() + ".txt";
 
             // ¡Magia! Le pasamos el texto a tu motor de archivos pesados.
-            // Él se encarga de guardarlo en disco, sacar el Hash, encriptarlo y meterlo en MySQL.
+            // Él se encarga de guardarlo en disco, sacar el Hash, encriptarlo y meterlo en
+            // MySQL.
             documentManager.procesarRecepcionDocumento(
-                    textStream, nombreArchivo, content.length(), ".txt", "text/plain", userId, clientIp
-            );
+                    textStream, nombreArchivo, content.length(), ".txt", "text/plain", userId, clientIp);
 
             // 3. Retransmisión en Tiempo Real (Chat Global)
-            // Usamos tu BroadcastManager para enviarle el texto a todos los clientes que estén conectados
+            // Usamos tu BroadcastManager para enviarle el texto a todos los clientes que
+            // estén conectados
             String mensajeRealTime = serializer.buildSuccessResponse(
                     JsonSchema.ACTION_NEW_MESSAGE,
-                    "De " + fromUser + ": " + content
-            );
+                    "De " + fromUser + ": " + content);
             broadcastManager.broadcast(mensajeRealTime);
 
             // LOG Y BROADCAST DE LOGS
@@ -237,7 +249,8 @@ public class MainRouter {
             broadcastManager.broadcast(handleListLogs());
 
             // 4. Le respondemos a quien lo envió que todo salió bien
-            return serializer.buildSuccessResponse(JsonSchema.ACTION_SEND_MESSAGE, "Mensaje procesado, encriptado y entregado.");
+            return serializer.buildSuccessResponse(JsonSchema.ACTION_SEND_MESSAGE,
+                    "Mensaje procesado, encriptado y entregado.");
 
         } catch (Exception e) {
             logger.error("Error procesando mensaje de texto", e);

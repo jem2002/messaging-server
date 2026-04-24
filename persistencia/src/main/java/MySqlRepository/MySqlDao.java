@@ -101,8 +101,8 @@ public class MySqlDao {
     }
 
     public void registrarLog(Long documentId, long senderId, Long receiverId, String action, String protocol, String status, String details) {
-        String sql = "INSERT INTO logs (document_id, sender_user_id, receiver_user_id, action, protocol, status, details) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO logs (document_id, sender_user_id, receiver_user_id, action, protocol, status, details, timestamp) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = dbManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -114,19 +114,30 @@ public class MySqlDao {
             stmt.setString(6, status);
             stmt.setString(7, details);
 
+            // Tiempo de Colombia (UTC-5)
+            java.time.ZonedDateTime colombiaTime = java.time.ZonedDateTime.now(java.time.ZoneId.of("America/Bogota"));
+            stmt.setTimestamp(8, java.sql.Timestamp.valueOf(colombiaTime.toLocalDateTime()));
+
             stmt.executeUpdate();
         } catch (SQLException e) {
             logger.error("Error al registrar log en auditoría: {} - Detalles: {}", action, details, e);
         }
     }
 
-    public List<Map<String, String>> listarDocumentosDisponibles() throws Exception {
-        List<Map<String, String>> documentos = new ArrayList<>();
+    public List<Map<String, String>> listarArchivosDisponibles() throws Exception {
+        return listarDocumentosFiltrados(false);
+    }
 
-        // Consulta exacta basada en tu schema.sql
+    public List<Map<String, String>> listarMensajesDisponibles() throws Exception {
+        return listarDocumentosFiltrados(true);
+    }
+
+    private List<Map<String, String>> listarDocumentosFiltrados(boolean soloTexto) throws Exception {
+        List<Map<String, String>> documentos = new ArrayList<>();
         String sql = "SELECT d.id, d.name, d.size_bytes, d.extension, u.username, u.ip_address " +
                 "FROM documents d " +
                 "JOIN users u ON d.owner_user_id = u.id " +
+                (soloTexto ? "WHERE d.extension = '.txt' " : "WHERE d.extension != '.txt' ") +
                 "ORDER BY d.id DESC";
 
         try (Connection conn = dbManager.getConnection();
@@ -136,16 +147,39 @@ public class MySqlDao {
             while (rs.next()) {
                 Map<String, String> doc = new HashMap<>();
                 doc.put("id", String.valueOf(rs.getLong("id")));
-
-                // Usando los nombres reales de las columnas de tu DB
                 doc.put("nombre", rs.getString("name"));
                 doc.put("tamano_bytes", String.valueOf(rs.getLong("size_bytes")));
                 doc.put("extension", rs.getString("extension"));
-
-                // Formateamos el propietario como pediste: Nombre (IP)
                 String propietario = rs.getString("username") + " (" + rs.getString("ip_address") + ")";
                 doc.put("propietario", propietario);
+                documentos.add(doc);
+            }
+        }
+        return documentos;
+    }
 
+    public List<Map<String, String>> listarDocumentosDisponibles() throws Exception {
+        return listarDocumentosFiltradosGeneral();
+    }
+
+    private List<Map<String, String>> listarDocumentosFiltradosGeneral() throws Exception {
+        List<Map<String, String>> documentos = new ArrayList<>();
+        String sql = "SELECT d.id, d.name, d.size_bytes, d.extension, u.username, u.ip_address " +
+                "FROM documents d " +
+                "JOIN users u ON d.owner_user_id = u.id " +
+                "ORDER BY d.id DESC";
+
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Map<String, String> doc = new HashMap<>();
+                doc.put("id", String.valueOf(rs.getLong("id")));
+                doc.put("nombre", rs.getString("name"));
+                doc.put("tamano_bytes", String.valueOf(rs.getLong("size_bytes")));
+                doc.put("extension", rs.getString("extension"));
+                String propietario = rs.getString("username") + " (" + rs.getString("ip_address") + ")";
+                doc.put("propietario", propietario);
                 documentos.add(doc);
             }
         }
@@ -269,6 +303,30 @@ public class MySqlDao {
                 } else {
                     throw new Exception("El usuario " + username + " no existe en la base de datos.");
                 }
+            }
+        }
+    }
+
+    public String obtenerRutaOriginal(long documentId) throws Exception {
+        String sql = "SELECT original_path FROM documents WHERE id = ?";
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, documentId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return rs.getString("original_path");
+                else throw new Exception("Documento no encontrado.");
+            }
+        }
+    }
+
+    public String obtenerHashValue(long documentId) throws Exception {
+        String sql = "SELECT hash_value FROM document_hashes WHERE document_id = ?";
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, documentId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return rs.getString("hash_value");
+                else throw new Exception("Hash no encontrado.");
             }
         }
     }

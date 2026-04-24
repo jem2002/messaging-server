@@ -50,8 +50,6 @@ public class ServerApplication {
             LocalFileManager fileManager = new LocalFileManager();
             CryptoManager cryptoManager = new CryptoManager();
             LogManager logManager = new LogManager(dao);
-         //
-            //   DocumentManager documentManager = new DocumentManager(storageManager, cryptoManager, dao, logManager);
             DocumentManager documentManager = new DocumentManager(fileManager, cryptoManager, dao, logManager);
             BroadcastManager broadcastManager = new BroadcastManager();
             TransferManager transferManager = new TransferManager();
