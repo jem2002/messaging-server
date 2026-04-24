@@ -95,7 +95,28 @@ public class DocumentManager {
 
     public List<Map<String, String>> obtenerMensajesDisponibles() {
         try {
-            return dao.listarMensajesDisponibles();
+            List<Map<String, String>> crudo = dao.listarMensajesDisponibles();
+            List<Map<String, String>> mensajesFinales = new java.util.ArrayList<>();
+
+            for (Map<String, String> item : crudo) {
+                Map<String, String> msg = new java.util.HashMap<>();
+                msg.put("propietario", item.get("propietario"));
+
+                // Intentar leer el contenido del archivo .txt
+                String pathStr = item.get("ruta_original");
+                String contenido;
+                try {
+                    contenido = Files.readString(Paths.get(pathStr));
+                } catch (Exception e) {
+                    contenido = "[Error al leer el contenido del mensaje]";
+                    logger.error("No se pudo leer el archivo .txt en {}", pathStr, e);
+                }
+                
+                msg.put("contenido", contenido);
+                mensajesFinales.add(msg);
+            }
+
+            return mensajesFinales;
         } catch (Exception e) {
             logger.error("Error al obtener la lista de mensajes de la BD", e);
             return new ArrayList<>();

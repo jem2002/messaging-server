@@ -3638,3 +3638,39 @@ java.util.NoSuchElementException: No line found
 	at java.base/java.util.Scanner.nextLine(Scanner.java:1660)
 	at console.InteractiveConsole.run(InteractiveConsole.java:25)
 	at ServerApplication.main(ServerApplication.java:82)
+2026-04-23 22:26:26 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 22:26:28 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 22:26:28 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 22:26:28 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 22:26:28 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 22:27:20 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:65171
+2026-04-23 22:27:20 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:65171
+2026-04-23 22:28:59 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: 1516f0ed-d337-45b9-8668-72741f2cf484) desde /192.168.1.4:62180
+2026-04-23 22:28:59 [FileTransfer-1516f0ed] INFO  handler.FileTransferHandler - Recibiendo archivo pesado. Token: 1516f0ed-d337-45b9-8668-72741f2cf484
+2026-04-23 22:28:59 [FileTransfer-1516f0ed] INFO  DocumentService.DocumentManager - 1. Guardando original en disco...
+2026-04-23 22:28:59 [FileTransfer-1516f0ed] INFO  DocumentService.DocumentManager - 2. Generando Hash y cifrando...
+2026-04-23 22:28:59 [FileTransfer-1516f0ed] INFO  CryptoService.CryptoManager - Iniciando Hash y Cifrado en un solo pase para: C:\Users\danie\Documents\messaging_project\messaging-server\.\storage\original\8cfa49f7-a43d-4349-8ca3-cf6029069ef4.txt
+2026-04-23 22:28:59 [FileTransfer-1516f0ed] INFO  DocumentService.DocumentManager - 3. Guardando metadatos en MySQL...
+2026-04-23 22:28:59 [FileTransfer-1516f0ed] INFO  DocumentService.DocumentManager - ¡Documento procesado al 100%! ID asignado: 14
+2026-04-23 22:30:08 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 22:30:09 [main] INFO  MySqlRepository.MySqlDao - Limpieza de inicio: 1 conexiones 'muertas' fueron cerradas.
+2026-04-23 22:30:10 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 22:30:10 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 22:30:10 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 22:30:10 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 22:30:55 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:57696
+2026-04-23 22:30:55 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:57696
+2026-04-23 22:31:44 [pool-1-thread-1] ERROR handler.ClientHandler - Conexión de CONTROL perdida con /192.168.1.4:57696
+2026-04-23 22:31:44 [pool-1-thread-1] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:57696 (User ID: 1)
+2026-04-23 22:31:51 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:49379
+2026-04-23 22:31:51 [pool-1-thread-2] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:49379
+2026-04-23 22:33:36 [pool-1-thread-2] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:49379 (User ID: 1)
+2026-04-23 22:33:52 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:52067
+2026-04-23 22:33:52 [pool-1-thread-3] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:52067
+2026-04-23 22:34:56 [pool-1-thread-3] ERROR handler.ClientHandler - Conexión de CONTROL perdida con /192.168.1.4:52067
+2026-04-23 22:34:56 [pool-1-thread-3] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:52067 (User ID: 1)
+2026-04-23 22:35:01 [main] ERROR ServerApplication - Error crítico durante el arranque del servidor.
+java.util.NoSuchElementException: No line found
+	at java.base/java.util.Scanner.nextLine(Scanner.java:1660)
+	at console.InteractiveConsole.run(InteractiveConsole.java:25)
+	at ServerApplication.main(ServerApplication.java:82)

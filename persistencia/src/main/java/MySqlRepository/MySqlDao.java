@@ -134,7 +134,7 @@ public class MySqlDao {
 
     private List<Map<String, String>> listarDocumentosFiltrados(boolean soloTexto) throws Exception {
         List<Map<String, String>> documentos = new ArrayList<>();
-        String sql = "SELECT d.id, d.name, d.size_bytes, d.extension, u.username, u.ip_address " +
+        String sql = "SELECT d.id, d.name, d.size_bytes, d.extension, d.original_path, u.username, u.ip_address " +
                 "FROM documents d " +
                 "JOIN users u ON d.owner_user_id = u.id " +
                 (soloTexto ? "WHERE d.extension = '.txt' " : "WHERE d.extension != '.txt' ") +
@@ -150,6 +150,7 @@ public class MySqlDao {
                 doc.put("nombre", rs.getString("name"));
                 doc.put("tamano_bytes", String.valueOf(rs.getLong("size_bytes")));
                 doc.put("extension", rs.getString("extension"));
+                doc.put("ruta_original", rs.getString("original_path"));
                 String propietario = rs.getString("username") + " (" + rs.getString("ip_address") + ")";
                 doc.put("propietario", propietario);
                 documentos.add(doc);
