@@ -66,12 +66,29 @@ public class ClientHandler implements Runnable {
 
                     if (ticket != null) {
                         if (token.startsWith("DWN-")) {
-                            // --- LÓGICA DE DESCARGA ---
-                            logger.info("Iniciando envío de archivo pesado al cliente. Token: {}", token);
-                            String encryptedPath = ticket.mimeType; // Donde guardamos la ruta temporalmente
+                            if (token.startsWith("DWN-ORG-")) {
+                                logger.info("Iniciando envío de ARCHIVO ORIGINAL al cliente. Token: {}", token);
+                                long docId = Long.parseLong(ticket.mimeType);
+                                documentManager.enviarDocumentoOriginal(docId, out);
 
-                            // Enviar el archivo descifrándolo al vuelo
-                            documentManager.enviarDocumentoAlCliente(encryptedPath, out);
+                            } else if (token.startsWith("DWN-ENC-")) {
+                                logger.info("Iniciando envío de ARCHIVO ENCRIPTADO al cliente. Token: {}", token);
+                                long docId = Long.parseLong(ticket.mimeType);
+                                documentManager.enviarDocumentoEncriptado(docId, out);
+
+                            } else if (token.startsWith("DWN-HSH-")) {
+                                logger.info("Iniciando envío de HASH del archivo al cliente. Token: {}", token);
+                                long docId = Long.parseLong(ticket.mimeType);
+                                documentManager.enviarDocumentoHash(docId, out);
+
+                            } else {
+                                // --- LÓGICA DE DESCARGA NORMAL ---
+                                logger.info("Iniciando envío de archivo pesado al cliente. Token: {}", token);
+                                String encryptedPath = ticket.mimeType; // Donde guardamos la ruta temporalmente
+    
+                                // Enviar el archivo descifrándolo al vuelo
+                                documentManager.enviarDocumentoAlCliente(encryptedPath, out);
+                            }
 
                         } else {
                             // --- LÓGICA DE SUBIDA (UPL) ---

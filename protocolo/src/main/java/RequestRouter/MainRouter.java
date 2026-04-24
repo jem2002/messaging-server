@@ -195,18 +195,31 @@ public class MainRouter {
             long size = Long.parseLong(detalles.get("tamano"));
             String encryptedPath = detalles.get("ruta_cifrada");
 
-            // ¡IMPORTANTE! Le ponemos el prefijo DWN- para distinguirlo de las subidas
-            String token = "DWN-" + java.util.UUID.randomUUID().toString();
+            // Detectamos el formato solicitado (si no viene, asumimos descarga normal)
+            String format = payload.has("format") ? payload.get("format").asText().toUpperCase() : "";
+            String prefix = "DWN-";
+            String ticketInfo = encryptedPath; // Por defecto mandamos el path
 
-            // Reutilizamos TransferTicket (puedes pasarle el encryptedPath en el campo
-            // 'mimeType' o añadir un campo nuevo)
-            TransferTicket ticket = new TransferTicket(token, filename, size, "", encryptedPath, 0, clientIp);
+            if (format.equals("ORG")) {
+                prefix = "DWN-ORG-";
+                ticketInfo = String.valueOf(docId);
+            } else if (format.equals("HSH")) {
+                prefix = "DWN-HSH-";
+                ticketInfo = String.valueOf(docId);
+            } else if (format.equals("ENC")) {
+                prefix = "DWN-ENC-";
+                ticketInfo = String.valueOf(docId);
+            }
+
+            // ¡IMPORTANTE! Le ponemos el prefijo adecuado para distinguirlo
+            String token = prefix + java.util.UUID.randomUUID().toString();
+
+            // Reutilizamos TransferTicket. En mimeType guardamos encryptedPath o el docId según el modo
+            TransferTicket ticket = new TransferTicket(token, filename, size, "", ticketInfo, 0, clientIp);
             transferManager.registrarTicket(ticket);
 
-            // LOG Y BROADCAST DE LOGS
-            broadcastManager.broadcast(handleListLogs());
 
-            return serializer.buildSuccessResponse("DOWNLOAD_INIT", token);
+            return serializer.buildDownloadInitResponse(token, size, docId);
 
         } catch (Exception e) {
             logger.error("Error al generar ticket de descarga", e);

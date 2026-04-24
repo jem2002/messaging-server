@@ -3475,3 +3475,49 @@ java.util.NoSuchElementException: No line found
 2026-04-23 20:13:25 [pool-1-thread-2] INFO  DocumentService.DocumentManager - ¡Documento procesado al 100%! ID asignado: 9
 2026-04-23 20:14:07 [pool-1-thread-2] ERROR handler.ClientHandler - Conexión perdida con /192.168.1.4:55904
 2026-04-23 20:14:07 [pool-1-thread-2] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:55904 (User ID: 1)
+2026-04-23 20:51:42 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 20:51:44 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 20:51:44 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 20:51:44 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 20:51:45 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 20:51:50 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo cliente unificado desde /192.168.1.4:63275
+2026-04-23 20:52:21 [pool-1-thread-1] ERROR handler.ClientHandler - Conexión perdida con /192.168.1.4:63275
+2026-04-23 20:52:21 [pool-1-thread-1] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:63275 (User ID: 1)
+2026-04-23 21:00:52 [pool-1-thread-2] INFO  handler.ClientHandler - Atendiendo cliente unificado desde /192.168.1.4:51012
+2026-04-23 21:01:06 [pool-1-thread-2] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:51012 (User ID: 1)
+2026-04-23 21:01:07 [pool-1-thread-3] INFO  handler.ClientHandler - Atendiendo cliente unificado desde /192.168.1.4:51016
+2026-04-23 21:01:17 [pool-1-thread-3] INFO  handler.ClientHandler - Iniciando envío de ARCHIVO ORIGINAL al cliente. Token: DWN-ORG-81b80c5d-80b0-4c38-892c-69db88a6fb68
+2026-04-23 21:04:32 [pool-1-thread-3] ERROR handler.ClientHandler - Conexión perdida con /192.168.1.4:51016
+2026-04-23 21:04:32 [pool-1-thread-3] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:51016 (User ID: 1)
+2026-04-23 21:06:08 [main] ERROR ServerApplication - Error crítico durante el arranque del servidor.
+java.util.NoSuchElementException: No line found
+	at java.base/java.util.Scanner.nextLine(Scanner.java:1660)
+	at console.InteractiveConsole.run(InteractiveConsole.java:25)
+	at ServerApplication.main(ServerApplication.java:82)
+2026-04-23 21:06:15 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 21:06:17 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 21:06:17 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 21:06:17 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 21:06:17 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 21:06:40 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo cliente unificado desde /192.168.1.4:52596
+2026-04-23 21:06:52 [pool-1-thread-1] INFO  handler.ClientHandler - Iniciando envío de ARCHIVO ORIGINAL al cliente. Token: DWN-ORG-e1d5b722-6003-4467-a164-2e390ce11f62
+2026-04-23 21:11:49 [pool-1-thread-1] INFO  handler.ClientHandler - Iniciando envío de ARCHIVO ORIGINAL al cliente. Token: DWN-ORG-bb874dff-72a6-4a73-8b5a-e2ccada93a6c
+2026-04-23 21:18:04 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 21:18:05 [main] INFO  MySqlRepository.MySqlDao - Limpieza de inicio: 1 conexiones 'muertas' fueron cerradas.
+2026-04-23 21:18:06 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 21:18:06 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 21:18:06 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 21:18:06 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 21:20:18 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo cliente unificado desde /192.168.1.4:60920
+2026-04-23 21:20:25 [pool-1-thread-1] INFO  handler.ClientHandler - Iniciando envío de ARCHIVO ORIGINAL al cliente. Token: DWN-ORG-5a187aeb-144e-4815-bfc9-aacf77fb8a99
+2026-04-23 21:22:32 [pool-1-thread-1] ERROR handler.ClientHandler - Conexión perdida con /192.168.1.4:60920
+2026-04-23 21:22:32 [pool-1-thread-1] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:60920 (User ID: 1)
+2026-04-23 21:22:56 [pool-1-thread-2] INFO  handler.ClientHandler - Atendiendo cliente unificado desde /192.168.1.4:55952
+2026-04-23 21:23:09 [pool-1-thread-2] INFO  handler.ClientHandler - Iniciando envío de ARCHIVO ORIGINAL al cliente. Token: DWN-ORG-f5fe987b-a7c1-44f9-b61c-0d14ac4ba9f6
+2026-04-23 21:25:48 [pool-1-thread-2] ERROR handler.ClientHandler - Conexión perdida con /192.168.1.4:55952
+2026-04-23 21:25:48 [pool-1-thread-2] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:55952 (User ID: 1)
+2026-04-23 21:35:41 [main] ERROR ServerApplication - Error crítico durante el arranque del servidor.
+java.util.NoSuchElementException: No line found
+	at java.base/java.util.Scanner.nextLine(Scanner.java:1660)
+	at console.InteractiveConsole.run(InteractiveConsole.java:25)
+	at ServerApplication.main(ServerApplication.java:82)

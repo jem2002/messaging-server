@@ -28,6 +28,21 @@ public class ResponseBuilder {
         return root.toString();
     }
 
+    public String buildDownloadInitResponse(String token, long size, long id) {
+        ObjectNode root = mapper.createObjectNode();
+        root.put(JsonSchema.KEY_ACTION, "DOWNLOAD_INIT_ACK");
+
+        ObjectNode payload = mapper.createObjectNode();
+        payload.put("status", "SUCCESS");
+        payload.put("message", token);
+        payload.put("size_bytes", size);
+        payload.put("document_id", id);
+
+        root.set(JsonSchema.KEY_PAYLOAD, payload);
+
+        return root.toString();
+    }
+
     public String buildErrorResponse(String reason) {
         ObjectNode root = mapper.createObjectNode();
         root.put(JsonSchema.KEY_ACTION, JsonSchema.ACTION_ERROR);
