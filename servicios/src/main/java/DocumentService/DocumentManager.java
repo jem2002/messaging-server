@@ -56,8 +56,24 @@ public class DocumentManager {
 
     public void enviarDocumentoHash(long documentId, OutputStream out) throws Exception {
         String hash = dao.obtenerHashValue(documentId);
+        if (hash == null) hash = "NO_HASH";
         out.write(hash.getBytes(StandardCharsets.UTF_8));
         out.flush();
+    }
+
+    public long obtenerTamanoHash(long documentId) throws Exception {
+        String hash = dao.obtenerHashValue(documentId);
+        if (hash == null) return "NO_HASH".getBytes(StandardCharsets.UTF_8).length;
+        return hash.getBytes(StandardCharsets.UTF_8).length;
+    }
+
+    public long obtenerTamanoEncriptado(long documentId) throws Exception {
+        Map<String, String> detalles = dao.obtenerDetallesDescarga(documentId);
+        String path = detalles.get("ruta_cifrada");
+        if (path != null) {
+            return Files.size(Paths.get(path));
+        }
+        return 0;
     }
     public List<Map<String, String>> obtenerDocumentosDisponibles() {
         try {

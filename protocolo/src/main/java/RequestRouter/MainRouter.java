@@ -203,12 +203,15 @@ public class MainRouter {
             if (format.equals("ORG")) {
                 prefix = "DWN-ORG-";
                 ticketInfo = String.valueOf(docId);
+                // El tamaño ya es el original por defecto
             } else if (format.equals("HSH")) {
                 prefix = "DWN-HSH-";
                 ticketInfo = String.valueOf(docId);
+                size = documentManager.obtenerTamanoHash(docId);
             } else if (format.equals("ENC")) {
                 prefix = "DWN-ENC-";
                 ticketInfo = String.valueOf(docId);
+                size = documentManager.obtenerTamanoEncriptado(docId);
             }
 
             // ¡IMPORTANTE! Le ponemos el prefijo adecuado para distinguirlo
