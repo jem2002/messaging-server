@@ -3521,3 +3521,85 @@ java.util.NoSuchElementException: No line found
 	at java.base/java.util.Scanner.nextLine(Scanner.java:1660)
 	at console.InteractiveConsole.run(InteractiveConsole.java:25)
 	at ServerApplication.main(ServerApplication.java:82)
+2026-04-23 21:45:02 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 21:45:05 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 21:45:05 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 21:45:05 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 21:45:05 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 21:45:51 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:60356
+2026-04-23 21:45:51 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:60356
+2026-04-23 21:46:24 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: d07447d9-97ce-46e8-9d00-45792a692628) desde /192.168.1.4:60362
+2026-04-23 21:46:24 [FileTransfer-d07447d9] INFO  handler.FileTransferHandler - Recibiendo archivo pesado. Token: d07447d9-97ce-46e8-9d00-45792a692628
+2026-04-23 21:46:24 [FileTransfer-d07447d9] INFO  DocumentService.DocumentManager - 1. Guardando original en disco...
+2026-04-23 21:46:24 [FileTransfer-d07447d9] INFO  DocumentService.DocumentManager - 2. Generando Hash y cifrando...
+2026-04-23 21:46:24 [FileTransfer-d07447d9] INFO  CryptoService.CryptoManager - Iniciando Hash y Cifrado en un solo pase para: C:\Users\danie\Documents\messaging_project\messaging-server\.\storage\original\ed1b52a2-5159-47b5-b2da-0716cf16aa0a.py
+2026-04-23 21:46:24 [FileTransfer-d07447d9] INFO  DocumentService.DocumentManager - 3. Guardando metadatos en MySQL...
+2026-04-23 21:46:25 [FileTransfer-d07447d9] INFO  DocumentService.DocumentManager - ¡Documento procesado al 100%! ID asignado: 10
+2026-04-23 21:47:26 [pool-1-thread-1] ERROR handler.ClientHandler - Conexión de CONTROL perdida con /192.168.1.4:60356
+2026-04-23 21:47:26 [pool-1-thread-1] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:60356 (User ID: 1)
+2026-04-23 21:47:35 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:57101
+2026-04-23 21:47:35 [pool-1-thread-2] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:57101
+2026-04-23 21:48:02 [pool-1-thread-2] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:57101 (User ID: 1)
+2026-04-23 21:48:03 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:64044
+2026-04-23 21:48:03 [pool-1-thread-3] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:64044
+2026-04-23 21:49:14 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: 00671386-0e0f-41c7-aa3e-2b2b525627f0) desde /192.168.1.4:60958
+2026-04-23 21:49:14 [FileTransfer-00671386] INFO  handler.FileTransferHandler - Recibiendo archivo pesado. Token: 00671386-0e0f-41c7-aa3e-2b2b525627f0
+2026-04-23 21:49:14 [FileTransfer-00671386] INFO  DocumentService.DocumentManager - 1. Guardando original en disco...
+2026-04-23 21:49:15 [FileTransfer-00671386] INFO  DocumentService.DocumentManager - 2. Generando Hash y cifrando...
+2026-04-23 21:49:15 [FileTransfer-00671386] INFO  CryptoService.CryptoManager - Iniciando Hash y Cifrado en un solo pase para: C:\Users\danie\Documents\messaging_project\messaging-server\.\storage\original\e238d10c-b9da-4a3b-8233-d46e725d2226.pptx
+2026-04-23 21:49:15 [FileTransfer-00671386] INFO  DocumentService.DocumentManager - 3. Guardando metadatos en MySQL...
+2026-04-23 21:49:15 [FileTransfer-00671386] INFO  DocumentService.DocumentManager - ¡Documento procesado al 100%! ID asignado: 11
+2026-04-23 21:51:38 [pool-1-thread-3] ERROR handler.ClientHandler - Conexión de CONTROL perdida con /192.168.1.4:64044
+2026-04-23 21:51:38 [pool-1-thread-3] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:64044 (User ID: 1)
+2026-04-23 21:55:00 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:59652
+2026-04-23 21:55:00 [pool-1-thread-4] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:59652
+2026-04-23 21:56:01 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: e2bc7bd6-335a-420d-9df8-d6a1426eb3e6) desde /192.168.1.4:59666
+2026-04-23 21:56:01 [FileTransfer-e2bc7bd6] INFO  handler.FileTransferHandler - Recibiendo archivo pesado. Token: e2bc7bd6-335a-420d-9df8-d6a1426eb3e6
+2026-04-23 21:56:01 [FileTransfer-e2bc7bd6] INFO  DocumentService.DocumentManager - 1. Guardando original en disco...
+2026-04-23 21:56:01 [FileTransfer-e2bc7bd6] INFO  DocumentService.DocumentManager - 2. Generando Hash y cifrando...
+2026-04-23 21:56:01 [FileTransfer-e2bc7bd6] INFO  CryptoService.CryptoManager - Iniciando Hash y Cifrado en un solo pase para: C:\Users\danie\Documents\messaging_project\messaging-server\.\storage\original\34804363-9e78-4cf8-95d9-145fa50ebbec.htm
+2026-04-23 21:56:01 [FileTransfer-e2bc7bd6] INFO  DocumentService.DocumentManager - 3. Guardando metadatos en MySQL...
+2026-04-23 21:56:01 [FileTransfer-e2bc7bd6] INFO  DocumentService.DocumentManager - ¡Documento procesado al 100%! ID asignado: 12
+2026-04-23 21:56:25 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-ORG-2dbc8355-36d4-4767-9e0b-a86ae2f03b13) desde /192.168.1.4:59670
+2026-04-23 21:56:25 [FileTransfer-DWN-ORG-] INFO  handler.FileTransferHandler - Enviando ARCHIVO ORIGINAL. Token: DWN-ORG-2dbc8355-36d4-4767-9e0b-a86ae2f03b13
+2026-04-23 21:56:25 [FileTransfer-DWN-ORG-] ERROR handler.FileTransferHandler - Error en transferencia de archivo para el token: DWN-ORG-2dbc8355-36d4-4767-9e0b-a86ae2f03b13
+java.net.SocketException: Se ha anulado una conexión establecida por el software en su equipo host.
+	at java.base/sun.nio.ch.SocketDispatcher.write0(Native Method)
+	at java.base/sun.nio.ch.SocketDispatcher.write(SocketDispatcher.java:54)
+	at java.base/sun.nio.ch.NioSocketImpl.tryWrite(NioSocketImpl.java:394)
+	at java.base/sun.nio.ch.NioSocketImpl.implWrite(NioSocketImpl.java:410)
+	at java.base/sun.nio.ch.NioSocketImpl.write(NioSocketImpl.java:440)
+	at java.base/sun.nio.ch.NioSocketImpl$2.write(NioSocketImpl.java:819)
+	at java.base/java.net.Socket$SocketOutputStream.write(Socket.java:1195)
+	at java.base/java.io.InputStream.transferTo(InputStream.java:797)
+	at java.base/sun.nio.ch.ChannelInputStream.transferTo(ChannelInputStream.java:268)
+	at java.base/java.nio.file.Files.copy(Files.java:3193)
+	at DocumentService.DocumentManager.enviarDocumentoOriginal(DocumentManager.java:46)
+	at handler.FileTransferHandler.run(FileTransferHandler.java:53)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-04-23 21:58:17 [pool-1-thread-4] ERROR handler.ClientHandler - Conexión de CONTROL perdida con /192.168.1.4:59652
+2026-04-23 21:58:17 [pool-1-thread-4] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:59652 (User ID: 1)
+2026-04-23 21:59:42 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 21:59:44 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 21:59:44 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 21:59:44 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 21:59:44 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 21:59:47 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:55134
+2026-04-23 21:59:47 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:55134
+2026-04-23 22:00:14 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: 730cefae-0e4b-49a7-88c7-3bf48d06e710) desde /192.168.1.4:55143
+2026-04-23 22:00:14 [FileTransfer-730cefae] INFO  handler.FileTransferHandler - Recibiendo archivo pesado. Token: 730cefae-0e4b-49a7-88c7-3bf48d06e710
+2026-04-23 22:00:14 [FileTransfer-730cefae] INFO  DocumentService.DocumentManager - 1. Guardando original en disco...
+2026-04-23 22:00:14 [FileTransfer-730cefae] INFO  DocumentService.DocumentManager - 2. Generando Hash y cifrando...
+2026-04-23 22:00:14 [FileTransfer-730cefae] INFO  CryptoService.CryptoManager - Iniciando Hash y Cifrado en un solo pase para: C:\Users\danie\Documents\messaging_project\messaging-server\.\storage\original\e624cfb7-ffd1-493a-bfd6-9cf622870974.png
+2026-04-23 22:00:14 [FileTransfer-730cefae] INFO  DocumentService.DocumentManager - 3. Guardando metadatos en MySQL...
+2026-04-23 22:00:14 [FileTransfer-730cefae] INFO  DocumentService.DocumentManager - ¡Documento procesado al 100%! ID asignado: 13
+2026-04-23 22:00:29 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-ORG-05d23649-9a73-481a-ba40-72135a1ec251) desde /192.168.1.4:55145
+2026-04-23 22:00:29 [FileTransfer-DWN-ORG-] INFO  handler.FileTransferHandler - Enviando ARCHIVO ORIGINAL. Token: DWN-ORG-05d23649-9a73-481a-ba40-72135a1ec251
+2026-04-23 22:00:51 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-ORG-9e413617-ce3d-4942-8410-d2b780989424) desde /192.168.1.4:55152
+2026-04-23 22:00:51 [FileTransfer-DWN-ORG-] INFO  handler.FileTransferHandler - Enviando ARCHIVO ORIGINAL. Token: DWN-ORG-9e413617-ce3d-4942-8410-d2b780989424
+2026-04-23 22:01:14 [pool-1-thread-1] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:55134 (User ID: 1)
+2026-04-23 22:01:17 [main] ERROR ServerApplication - Error crítico durante el arranque del servidor.
+java.util.NoSuchElementException: No line found
+	at java.base/java.util.Scanner.nextLine(Scanner.java:1660)
+	at console.InteractiveConsole.run(InteractiveConsole.java:25)
+	at ServerApplication.main(ServerApplication.java:82)

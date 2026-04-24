@@ -6,6 +6,7 @@ import RequestRouter.MainRouter;
 import RequestRouter.TransferManager;
 import executor.ThreadPoolManager;
 import handler.ClientHandler;
+import handler.FileTransferHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pool.IConnectionPool;
@@ -63,32 +64,70 @@ public class TCPSocketServer implements Runnable {
             while (running) {
                 // 1. Aceptar conexión (Bloqueante)
                 Socket clientSocket = serverSocket.accept();
-                logger.debug("Nueva conexión TCP entrante...");
+                logger.debug("Nueva conexión TCP entrante desde {}", clientSocket.getRemoteSocketAddress());
 
-                // 2. Adquirir conexión reciclable del pool
-                PooledClientConnection pooledConnection = pool.acquire();
+                // 2. Triage: Leer la primera línea para saber qué tipo de conexión es
+                // Usamos un pequeño timeout para que no bloquee el server si alguien conecta y no manda nada
+                clientSocket.setSoTimeout(5000); 
+                String primeraLinea;
+                try {
+                    primeraLinea = leerLinea(clientSocket.getInputStream());
+                } catch (Exception e) {
+                    logger.warn("Error leyendo primera línea de {}, cerrando socket.", clientSocket.getRemoteSocketAddress());
+                    clientSocket.close();
+                    continue;
+                }
+                clientSocket.setSoTimeout(0); // Quitar timeout para la vida de la conexión
 
-                if (pooledConnection == null) {
-                    logger.warn("Rechazando conexión: Pool agotado.");
+                if (primeraLinea == null || primeraLinea.isEmpty()) {
                     clientSocket.close();
                     continue;
                 }
 
-                // 3. Configurar el socket y delegar al Handler en el ThreadPool
-                pooledConnection.setSocket(clientSocket);
+                if (primeraLinea.startsWith("{")) {
+                    // =============== MODO CONTROL (JSON) ===============
+                    logger.info("Detectada conexión de CONTROL desde {}", clientSocket.getRemoteSocketAddress());
+                    
+                    PooledClientConnection pooledConnection = pool.acquire();
+                    if (pooledConnection == null) {
+                        logger.warn("Rechazando conexión de control: Pool agotado.");
+                        clientSocket.close();
+                        continue;
+                    }
 
-                // 4. PASAR LAS NUEVAS DEPENDENCIAS AL HANDLER
-                ClientHandler handler = new ClientHandler(pooledConnection, pool, router, this.broadcastManager, this.transferManager, this.documentManager);
-                threadPool.execute(handler);
+                    pooledConnection.setSocket(clientSocket);
+                    // Usamos el handler de control (en el pool)
+                    ClientHandler handler = new ClientHandler(pooledConnection, pool, router, this.broadcastManager, this.transferManager, this.documentManager, primeraLinea);
+                    threadPool.execute(handler);
+
+                } else {
+                    // =============== MODO ARCHIVO (TOKEN) ===============
+                    logger.info("Detectada conexión de ARCHIVO (Token: {}) desde {}", primeraLinea, clientSocket.getRemoteSocketAddress());
+                    
+                    // Para archivos usamos hilos del sistema (no del pool) como se solicitó
+                    FileTransferHandler fileHandler = new FileTransferHandler(clientSocket, primeraLinea, transferManager, documentManager, router, broadcastManager);
+                    new Thread(fileHandler, "FileTransfer-" + primeraLinea.substring(0, Math.min(8, primeraLinea.length()))).start();
+                }
             }
         } catch (IOException e) {
             if (running) {
-                logger.error("Error en el bucle principal de tcpsocketserver.TCPSocketServer", e);
+                logger.error("Error en el bucle principal de TCPSocketServer", e);
             } else {
-                logger.info("tcpsocketserver.TCPSocketServer detenido correctamente.");
+                logger.info("TCPSocketServer detenido correctamente.");
             }
         } catch (Exception e) {
             logger.error("Error configurando la conexión del cliente.", e);
         }
+    }
+
+    private String leerLinea(java.io.InputStream in) throws Exception {
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        int c;
+        while ((c = in.read()) != -1) {
+            if (c == '\n') break;
+            if (c != '\r') baos.write(c);
+        }
+        if (c == -1 && baos.size() == 0) return null;
+        return baos.toString(java.nio.charset.StandardCharsets.UTF_8.name()).trim();
     }
 }

@@ -22,15 +22,20 @@ public class ClientHandler implements Runnable {
     private final BroadcastManager broadcastManager;
     private final TransferManager transferManager;
     private final DocumentManager documentManager;
+    private final String primeraLinea;
 
-    public ClientHandler(PooledClientConnection connection, IConnectionPool pool, MainRouter router, BroadcastManager broadcastManager,TransferManager transferManager, DocumentManager documentManager) {
+    public ClientHandler(PooledClientConnection connection, IConnectionPool pool, MainRouter router, 
+                         BroadcastManager broadcastManager, TransferManager transferManager, 
+                         DocumentManager documentManager, String primeraLinea) {
         this.connection = connection;
         this.pool = pool;
         this.router = router;
         this.broadcastManager = broadcastManager;
         this.transferManager = transferManager;
         this.documentManager = documentManager;
+        this.primeraLinea = primeraLinea;
     }
+
     @Override
     public void run() {
         String clientIp = "UNKNOWN";
@@ -40,10 +45,14 @@ public class ClientHandler implements Runnable {
             InputStream in = connection.getInputStream();
             out = connection.getOutputStream();
 
-            // MODO UNIFICADO
+            // MODO CONTROL PERSISTENTE
             broadcastManager.addStream(out);
-            logger.info("Atendiendo cliente unificado desde {}", clientIp);
+            logger.info("Atendiendo conexión de CONTROL desde {}", clientIp);
 
+            // 1. Procesar la primera línea que ya leímos en el Triage
+            procesarJson(primeraLinea, out, clientIp);
+
+            // 2. Bucle para seguir recibiendo comandos JSON
             while (true) {
                 String linea = leerLinea(in);
                 if (linea == null) {
@@ -51,69 +60,18 @@ public class ClientHandler implements Runnable {
                 }
 
                 if (linea.isEmpty()) {
-                    continue; // Ignorar líneas vacías
+                    continue; 
                 }
 
                 if (linea.startsWith("{")) {
-                    // =============== MODO NORMAL (JSON CHAT) ===============
-                    String jsonResponse = router.routeRequest(linea, clientIp);
-                    out.write((jsonResponse + "\n").getBytes(StandardCharsets.UTF_8));
-                    out.flush();
+                    procesarJson(linea, out, clientIp);
                 } else {
-                    // =============== MODO TRANSFERENCIA DE ARCHIVOS ===============
-                    String token = linea;
-                    TransferTicket ticket = transferManager.validarYConsumirTicket(token);
-
-                    if (ticket != null) {
-                        if (token.startsWith("DWN-")) {
-                            if (token.startsWith("DWN-ORG-")) {
-                                logger.info("Iniciando envío de ARCHIVO ORIGINAL al cliente. Token: {}", token);
-                                long docId = Long.parseLong(ticket.mimeType);
-                                documentManager.enviarDocumentoOriginal(docId, out);
-
-                            } else if (token.startsWith("DWN-ENC-")) {
-                                logger.info("Iniciando envío de ARCHIVO ENCRIPTADO al cliente. Token: {}", token);
-                                long docId = Long.parseLong(ticket.mimeType);
-                                documentManager.enviarDocumentoEncriptado(docId, out);
-
-                            } else if (token.startsWith("DWN-HSH-")) {
-                                logger.info("Iniciando envío de HASH del archivo al cliente. Token: {}", token);
-                                long docId = Long.parseLong(ticket.mimeType);
-                                documentManager.enviarDocumentoHash(docId, out);
-
-                            } else {
-                                // --- LÓGICA DE DESCARGA NORMAL ---
-                                logger.info("Iniciando envío de archivo pesado al cliente. Token: {}", token);
-                                String encryptedPath = ticket.mimeType; // Donde guardamos la ruta temporalmente
-    
-                                // Enviar el archivo descifrándolo al vuelo
-                                documentManager.enviarDocumentoAlCliente(encryptedPath, out);
-                            }
-
-                        } else {
-                            // --- LÓGICA DE SUBIDA (UPL) ---
-                            logger.info("Iniciando recepción de archivo pesado. Token: {}", token);
-                            boolean exito = documentManager.procesarRecepcionDocumento(
-                                    in, ticket.filename, ticket.sizeBytes, ticket.extension,
-                                    ticket.mimeType, ticket.ownerUserId, ticket.ownerIp
-                            );
-                            
-                            if (exito) {
-                                broadcastManager.broadcast(router.handleListDocuments());
-                            }
-
-                            String status = exito ? "{\"status\":\"UPLOAD_SUCCESS\"}\n" : "{\"status\":\"UPLOAD_FAILED\"}\n";
-                            out.write(status.getBytes(StandardCharsets.UTF_8));
-                            out.flush();
-                        }
-                    } else {
-                        logger.warn("Ticket inválido o ignorado desde {}", clientIp);
-                    }
+                    logger.warn("Recibido dato no-JSON en conexión de CONTROL desde {}: {}", clientIp, linea);
                 }
             }
 
         } catch (Exception e) {
-            logger.error("Conexión perdida con {}", clientIp);
+            logger.error("Conexión de CONTROL perdida con {}", clientIp);
         } finally {
             router.notificarDesconexionFisica(clientIp, out);
             if (out != null) broadcastManager.removeStream(out);
@@ -121,17 +79,21 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    // MÉTODO AUXILIAR PARA LEER UNA LÍNEA SIN ROMPER LOS BYTES
+    private void procesarJson(String json, OutputStream out, String clientIp) throws Exception {
+        String jsonResponse = router.routeRequest(json, clientIp);
+        out.write((jsonResponse + "\n").getBytes(StandardCharsets.UTF_8));
+        out.flush();
+    }
+
+    // MÉTODO AUXILIAR PARA LEER UNA LÍNEA
     private String leerLinea(InputStream in) throws Exception {
-        StringBuilder sb = new StringBuilder();
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
         int c;
         while ((c = in.read()) != -1) {
             if (c == '\n') break;
-            sb.append((char) c);
+            if (c != '\r') baos.write(c);
         }
-        if (c == -1 && sb.length() == 0) {
-            return null; // EOF
-        }
-        return sb.toString().trim();
+        if (c == -1 && baos.size() == 0) return null;
+        return baos.toString(StandardCharsets.UTF_8.name()).trim();
     }
 }
