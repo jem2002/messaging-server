@@ -40,7 +40,7 @@ public class ServerApplication {
             ServerConfig config = new ServerConfig();
 
             // 2. Módulo Persistencia
-            DatabaseInitializer.initializeSchema();
+          // DatabaseInitializer.initializeSchema();
             MySqlDao dao = new MySqlDao();
             dao.limpiarConexionesMuertas();
 

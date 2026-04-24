@@ -195,3 +195,29 @@ java.sql.SQLIntegrityConstraintViolationException: Cannot add or update a child 
 2026-04-24 00:55:17 [pool-1-thread-5] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:52546 (User ID: 1)
 2026-04-24 00:55:19 [pool-1-thread-6] ERROR handler.ClientHandler - Conexión de CONTROL perdida con /192.168.1.4:52556
 2026-04-24 00:55:19 [pool-1-thread-6] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:52556 (User ID: 2)
+2026-04-24 08:59:07 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-24 08:59:07 [main] INFO  MySqlRepository.DatabaseInitializer - Aplicando esquema de tablas desde schema.sql...
+2026-04-24 08:59:07 [main] INFO  MySqlRepository.SqlScriptRunner - Leyendo script SQL: schema.sql
+2026-04-24 08:59:08 [main] INFO  MySqlRepository.SqlScriptRunner - Script schema.sql ejecutado correctamente.
+2026-04-24 08:59:08 [main] INFO  MySqlRepository.DatabaseInitializer - Base de datos lista: Tablas creadas/actualizadas con éxito.
+2026-04-24 08:59:08 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 2 conexiones.
+2026-04-24 08:59:08 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 2 hilos.
+2026-04-24 08:59:08 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-24 08:59:08 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-24 08:59:13 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /172.16.201.187:53159
+2026-04-24 08:59:13 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /172.16.201.187:53159
+2026-04-24 08:59:34 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /172.16.201.190:54529
+2026-04-24 08:59:34 [pool-1-thread-2] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /172.16.201.190:54529
+2026-04-24 08:59:48 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /172.16.201.189:51602
+2026-04-24 08:59:48 [Thread-TCPServer] WARN  pool.ConnectionPoolManager - ¡Pool de conexiones agotado!
+2026-04-24 08:59:48 [Thread-TCPServer] WARN  tcpsocketserver.TCPSocketServer - Rechazando conexión de control: Pool agotado.
+2026-04-24 09:00:27 [pool-1-thread-1] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 172.16.201.187:53159 (User ID: 1)
+2026-04-24 09:00:47 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /172.16.201.189:51622
+2026-04-24 09:00:47 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /172.16.201.189:51622
+2026-04-24 09:02:27 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: 88dabb77-9b26-4a06-8515-6fc43caf4e77) desde /172.16.201.189:51628
+2026-04-24 09:02:27 [FileTransfer-88dabb77] INFO  handler.FileTransferHandler - Recibiendo archivo pesado. Token: 88dabb77-9b26-4a06-8515-6fc43caf4e77
+2026-04-24 09:02:27 [FileTransfer-88dabb77] INFO  DocumentService.DocumentManager - 1. Guardando original en disco...
+2026-04-24 09:02:27 [FileTransfer-88dabb77] INFO  DocumentService.DocumentManager - 2. Generando Hash y cifrando...
+2026-04-24 09:02:27 [FileTransfer-88dabb77] INFO  CryptoService.CryptoManager - Iniciando Hash y Cifrado en un solo pase para: C:\Users\Estudiante\Downloads\messaging_project (2)\messaging_project\messaging-server\.\storage\original\60abdea0-4edf-47c9-ada5-0320ea9ead27.pptx
+2026-04-24 09:02:27 [FileTransfer-88dabb77] INFO  DocumentService.DocumentManager - 3. Guardando metadatos en MySQL...
+2026-04-24 09:02:27 [FileTransfer-88dabb77] INFO  DocumentService.DocumentManager - ¡Documento procesado al 100%! ID asignado: 1
