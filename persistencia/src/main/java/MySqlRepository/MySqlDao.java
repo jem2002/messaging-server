@@ -52,11 +52,12 @@ public class MySqlDao {
 
     // 1. Guardar el Documento principal
     public long registrarDocumento(String name, long sizeBytes, String extension, String mimeType,
-                                   String docType, String originalPath, long ownerUserId, String ownerIp) throws Exception {
-        String sql = "INSERT INTO documents (name, size_bytes, extension, mime_type, doc_type, original_path, owner_user_id, owner_ip) " +
+            String docType, String originalPath, long ownerUserId, String ownerIp) throws Exception {
+        String sql = "INSERT INTO documents (name, size_bytes, extension, mime_type, doc_type, original_path, owner_user_id, owner_ip) "
+                +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, name);
             stmt.setLong(2, sizeBytes);
             stmt.setString(3, extension);
@@ -80,18 +81,20 @@ public class MySqlDao {
     public void registrarHashDocumento(long documentId, String algorithm, String hashValue) throws Exception {
         String sql = "INSERT INTO document_hashes (document_id, algorithm, hash_value) VALUES (?, ?, ?)";
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, documentId);
             stmt.setString(2, algorithm);
             stmt.setString(3, hashValue);
             stmt.executeUpdate();
         }
     }
+
     // 3. Guardar el Cifrado
-    public void registrarCifradoDocumento(long documentId, String algorithm, String encryptedPath, String keyReference) throws Exception {
+    public void registrarCifradoDocumento(long documentId, String algorithm, String encryptedPath, String keyReference)
+            throws Exception {
         String sql = "INSERT INTO encrypted_documents (document_id, algorithm, encrypted_path, key_reference) VALUES (?, ?, ?, ?)";
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, documentId);
             stmt.setString(2, algorithm);
             stmt.setString(3, encryptedPath);
@@ -100,15 +103,23 @@ public class MySqlDao {
         }
     }
 
-    public void registrarLog(Long documentId, long senderId, Long receiverId, String action, String protocol, String status, String details) {
-        String sql = "INSERT INTO logs (document_id, sender_user_id, receiver_user_id, action, protocol, status, details, timestamp) " +
+    public void registrarLog(Long documentId, long senderId, Long receiverId, String action, String protocol,
+            String status, String details) {
+        String sql = "INSERT INTO logs (document_id, sender_user_id, receiver_user_id, action, protocol, status, details, timestamp) "
+                +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            if (documentId != null) stmt.setLong(1, documentId); else stmt.setNull(1, Types.BIGINT);
+            if (documentId != null)
+                stmt.setLong(1, documentId);
+            else
+                stmt.setNull(1, Types.BIGINT);
             stmt.setLong(2, senderId);
-            if (receiverId != null) stmt.setLong(3, receiverId); else stmt.setNull(3, Types.BIGINT);
+            if (receiverId != null)
+                stmt.setLong(3, receiverId);
+            else
+                stmt.setNull(3, Types.BIGINT);
             stmt.setString(4, action);
             stmt.setString(5, protocol);
             stmt.setString(6, status);
@@ -125,35 +136,37 @@ public class MySqlDao {
     }
 
     public List<Map<String, String>> listarArchivosDisponibles() throws Exception {
-        return listarDocumentosFiltrados(false);
+        return listarDocumentosFiltrados("FILE");
     }
 
     public List<Map<String, String>> listarMensajesDisponibles() throws Exception {
-        return listarDocumentosFiltrados(true);
+        return listarDocumentosFiltrados("MESSAGE");
     }
 
-    private List<Map<String, String>> listarDocumentosFiltrados(boolean soloTexto) throws Exception {
+    private List<Map<String, String>> listarDocumentosFiltrados(String type) throws Exception {
         List<Map<String, String>> documentos = new ArrayList<>();
         String sql = "SELECT d.id, d.name, d.size_bytes, d.extension, d.original_path, u.username, u.ip_address " +
                 "FROM documents d " +
                 "JOIN users u ON d.owner_user_id = u.id " +
-                (soloTexto ? "WHERE d.extension = '.txt' " : "WHERE d.extension != '.txt' ") +
+                "WHERE d.doc_type = ? " +
                 "ORDER BY d.id DESC";
 
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                Map<String, String> doc = new HashMap<>();
-                doc.put("id", String.valueOf(rs.getLong("id")));
-                doc.put("nombre", rs.getString("name"));
-                doc.put("tamano_bytes", String.valueOf(rs.getLong("size_bytes")));
-                doc.put("extension", rs.getString("extension"));
-                doc.put("ruta_original", rs.getString("original_path"));
-                String propietario = rs.getString("username") + " (" + rs.getString("ip_address") + ")";
-                doc.put("propietario", propietario);
-                documentos.add(doc);
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, type);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, String> doc = new HashMap<>();
+                    doc.put("id", String.valueOf(rs.getLong("id")));
+                    doc.put("nombre", rs.getString("name"));
+                    doc.put("tamano_bytes", String.valueOf(rs.getLong("size_bytes")));
+                    doc.put("extension", rs.getString("extension"));
+                    doc.put("ruta_original", rs.getString("original_path"));
+                    String propietario = rs.getString("username") + " (" + rs.getString("ip_address") + ")";
+                    doc.put("propietario", propietario);
+                    documentos.add(doc);
+                }
             }
         }
         return documentos;
@@ -171,8 +184,8 @@ public class MySqlDao {
                 "ORDER BY d.id DESC";
 
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 Map<String, String> doc = new HashMap<>();
                 doc.put("id", String.valueOf(rs.getLong("id")));
@@ -192,8 +205,8 @@ public class MySqlDao {
         String sql = "SELECT id, username, ip_address, created_at FROM users ORDER BY id ASC";
 
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 Map<String, String> user = new HashMap<>();
@@ -212,11 +225,11 @@ public class MySqlDao {
         String sql = "INSERT INTO client_connections (user_id, ip_address, port, protocol, is_active, connected_at) VALUES (?, ?, ?, ?, TRUE, NOW())";
 
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setLong(1, userId);
             stmt.setString(2, ipAddress);
-            stmt.setInt(3, port);         // Insertamos el puerto
+            stmt.setInt(3, port); // Insertamos el puerto
             stmt.setString(4, protocol);
             stmt.executeUpdate();
 
@@ -224,14 +237,16 @@ public class MySqlDao {
             return rs.next() ? rs.getLong(1) : -1;
         }
     }
+
     public void cerrarSesionActiva(long sessionId) throws SQLException {
         String sql = "UPDATE client_connections SET is_active = FALSE, disconnected_at = NOW() WHERE id = ?";
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, sessionId);
             stmt.executeUpdate();
         }
     }
+
     public long cerrarSesionPorIpYPuerto(String ipAddress, int port) throws Exception {
         String selectSql = "SELECT user_id FROM client_connections WHERE ip_address = ? AND port = ? AND is_active = TRUE";
         String updateSql = "UPDATE client_connections SET is_active = FALSE, disconnected_at = NOW() WHERE ip_address = ? AND port = ? AND is_active = TRUE";
@@ -256,6 +271,7 @@ public class MySqlDao {
         }
         return userId;
     }
+
     public List<Map<String, String>> listarClientesActivos() throws Exception {
         List<Map<String, String>> activos = new ArrayList<>();
         // JOIN entre usuarios y sus conexiones activas
@@ -265,8 +281,8 @@ public class MySqlDao {
                 "WHERE c.is_active = TRUE";
 
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 Map<String, String> client = new HashMap<>();
@@ -278,10 +294,11 @@ public class MySqlDao {
         }
         return activos;
     }
+
     public void limpiarConexionesMuertas() {
         String sql = "UPDATE client_connections SET is_active = FALSE, disconnected_at = NOW() WHERE is_active = TRUE";
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             int limpiados = stmt.executeUpdate();
             if (limpiados > 0) {
                 logger.info("Limpieza de inicio: {} conexiones 'muertas' fueron cerradas.", limpiados);
@@ -294,7 +311,7 @@ public class MySqlDao {
     public long obtenerIdUsuarioPorUsername(String username) throws Exception {
         String sql = "SELECT id FROM users WHERE username = ?";
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
 
@@ -311,11 +328,13 @@ public class MySqlDao {
     public String obtenerRutaOriginal(long documentId) throws Exception {
         String sql = "SELECT original_path FROM documents WHERE id = ?";
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, documentId);
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) return rs.getString("original_path");
-                else throw new Exception("Documento no encontrado.");
+                if (rs.next())
+                    return rs.getString("original_path");
+                else
+                    throw new Exception("Documento no encontrado.");
             }
         }
     }
@@ -323,11 +342,13 @@ public class MySqlDao {
     public String obtenerHashValue(long documentId) throws Exception {
         String sql = "SELECT hash_value FROM document_hashes WHERE document_id = ?";
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, documentId);
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) return rs.getString("hash_value");
-                else throw new Exception("Hash no encontrado.");
+                if (rs.next())
+                    return rs.getString("hash_value");
+                else
+                    throw new Exception("Hash no encontrado.");
             }
         }
     }
@@ -339,7 +360,7 @@ public class MySqlDao {
                 "WHERE d.id = ?";
 
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setLong(1, documentId);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -365,8 +386,8 @@ public class MySqlDao {
                 "ORDER BY l.id DESC";
 
         try (Connection conn = dbManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 Map<String, String> log = new HashMap<>();

@@ -3674,3 +3674,22 @@ java.util.NoSuchElementException: No line found
 	at java.base/java.util.Scanner.nextLine(Scanner.java:1660)
 	at console.InteractiveConsole.run(InteractiveConsole.java:25)
 	at ServerApplication.main(ServerApplication.java:82)
+2026-04-23 22:42:11 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 22:42:13 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 22:42:13 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 22:42:13 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 22:42:13 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 22:42:59 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:54517
+2026-04-23 22:42:59 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:54517
+2026-04-23 22:43:45 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-ORG-1755e910-1891-45bd-a3eb-83714c14c307) desde /192.168.1.4:58169
+2026-04-23 22:43:45 [FileTransfer-DWN-ORG-] INFO  handler.FileTransferHandler - Enviando ARCHIVO ORIGINAL. Token: DWN-ORG-1755e910-1891-45bd-a3eb-83714c14c307
+2026-04-23 22:44:04 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-ORG-aae91ce7-4a92-48d3-9885-e796639d2190) desde /192.168.1.4:59485
+2026-04-23 22:44:04 [FileTransfer-DWN-ORG-] INFO  handler.FileTransferHandler - Enviando ARCHIVO ORIGINAL. Token: DWN-ORG-aae91ce7-4a92-48d3-9885-e796639d2190
+2026-04-23 22:44:19 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de ARCHIVO (Token: DWN-HSH-b1e4f43b-ae43-476e-acfe-1fc4754afc35) desde /192.168.1.4:53253
+2026-04-23 22:44:19 [FileTransfer-DWN-HSH-] INFO  handler.FileTransferHandler - Enviando HASH. Token: DWN-HSH-b1e4f43b-ae43-476e-acfe-1fc4754afc35
+2026-04-23 22:44:38 [pool-1-thread-1] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:54517 (User ID: 1)
+2026-04-23 22:44:50 [main] ERROR ServerApplication - Error crítico durante el arranque del servidor.
+java.util.NoSuchElementException: No line found
+	at java.base/java.util.Scanner.nextLine(Scanner.java:1660)
+	at console.InteractiveConsole.run(InteractiveConsole.java:25)
+	at ServerApplication.main(ServerApplication.java:82)
