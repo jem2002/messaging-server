@@ -72,7 +72,7 @@ public class FileTransferHandler implements Runnable {
                 logger.info("Recibiendo archivo pesado. Token: {}", token);
                 boolean exito = documentManager.procesarRecepcionDocumento(
                         in, ticket.filename, ticket.sizeBytes, ticket.extension,
-                        ticket.mimeType, ticket.ownerUserId, ticket.ownerIp
+                        ticket.mimeType, ticket.ownerUserId, ticket.ownerIp, "FILE"
                 );
 
                 if (exito) {

@@ -250,7 +250,7 @@ public class MainRouter {
             // Él se encarga de guardarlo en disco, sacar el Hash, encriptarlo y meterlo en
             // MySQL.
             documentManager.procesarRecepcionDocumento(
-                    textStream, nombreArchivo, content.length(), ".txt", "text/plain", userId, clientIp);
+                    textStream, nombreArchivo, content.length(), ".txt", "text/plain", userId, clientIp, "MESSAGE");
 
             // 3. Retransmisión en Tiempo Real (Chat Global)
             // Usamos tu BroadcastManager para enviarle el texto a todos los clientes que

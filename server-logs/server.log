@@ -3693,3 +3693,52 @@ java.util.NoSuchElementException: No line found
 	at java.base/java.util.Scanner.nextLine(Scanner.java:1660)
 	at console.InteractiveConsole.run(InteractiveConsole.java:25)
 	at ServerApplication.main(ServerApplication.java:82)
+2026-04-23 22:45:22 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 22:45:24 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 22:45:24 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 22:45:24 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 22:45:24 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 22:45:30 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:65358
+2026-04-23 22:45:30 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:65358
+2026-04-23 22:54:10 [pool-1-thread-1] ERROR handler.ClientHandler - Conexión de CONTROL perdida con /192.168.1.4:65358
+2026-04-23 22:54:10 [pool-1-thread-1] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:65358 (User ID: 1)
+2026-04-23 22:54:18 [main] INFO  ServerApplication - Arrancando Messaging Server...
+2026-04-23 22:54:21 [main] INFO  pool.ConnectionPoolManager - ConnectionPoolManager inicializado con 10 conexiones.
+2026-04-23 22:54:21 [main] INFO  executor.ThreadPoolManager - ThreadPoolManager inicializado con 10 hilos.
+2026-04-23 22:54:21 [main] INFO  protocolSelector.ProtocolSelector - Iniciando servicio en modo TCP...
+2026-04-23 22:54:21 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - tcpsocketserver.TCPSocketServer escuchando en el puerto TCP: 8080
+2026-04-23 22:54:25 [Thread-TCPServer] INFO  tcpsocketserver.TCPSocketServer - Detectada conexión de CONTROL desde /192.168.1.4:56260
+2026-04-23 22:54:25 [pool-1-thread-1] INFO  handler.ClientHandler - Atendiendo conexión de CONTROL desde /192.168.1.4:56260
+2026-04-23 22:54:59 [pool-1-thread-1] INFO  DocumentService.DocumentManager - 1. Guardando original en disco...
+2026-04-23 22:54:59 [pool-1-thread-1] INFO  DocumentService.DocumentManager - 2. Generando Hash y cifrando...
+2026-04-23 22:55:00 [pool-1-thread-1] INFO  CryptoService.CryptoManager - Iniciando Hash y Cifrado en un solo pase para: C:\Users\danie\Documents\messaging_project\messaging-server\.\storage\original\6e8698c6-6c1d-4ec1-93e7-b15ace11328c.txt
+2026-04-23 22:55:00 [pool-1-thread-1] INFO  DocumentService.DocumentManager - 3. Guardando metadatos en MySQL...
+2026-04-23 22:55:00 [pool-1-thread-1] INFO  DocumentService.DocumentManager - ¡Documento procesado al 100%! ID asignado: 15
+2026-04-23 22:55:01 [pool-1-thread-1] ERROR MySqlRepository.MySqlDao - Error al registrar log en auditoría: SEND_MESSAGE - Detalles: Mensaje enviado por Usuario1
+java.sql.SQLException: Data truncated for column 'action' at row 1
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:121)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:114)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.serverExecute(ServerPreparedStatement.java:612)
+	at com.mysql.cj.jdbc.ServerPreparedStatement.executeInternal(ServerPreparedStatement.java:320)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1166)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1101)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1467)
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:1084)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java)
+	at MySqlRepository.MySqlDao.registrarLog(MySqlDao.java:132)
+	at LogService.LogManager.registrarAccion(LogManager.java:13)
+	at RequestRouter.MainRouter.handleSendMessage(MainRouter.java:264)
+	at RequestRouter.MainRouter.routeRequest(MainRouter.java:67)
+	at handler.ClientHandler.procesarJson(ClientHandler.java:83)
+	at handler.ClientHandler.run(ClientHandler.java:67)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-04-23 22:56:45 [pool-1-thread-1] ERROR handler.ClientHandler - Conexión de CONTROL perdida con /192.168.1.4:56260
+2026-04-23 22:56:45 [pool-1-thread-1] INFO  UserService.UserManager - Estado actualizado: Sesión cerrada en BD para 192.168.1.4:56260 (User ID: 1)
+2026-04-23 22:57:19 [main] ERROR ServerApplication - Error crítico durante el arranque del servidor.
+java.util.NoSuchElementException: No line found
+	at java.base/java.util.Scanner.nextLine(Scanner.java:1660)
+	at console.InteractiveConsole.run(InteractiveConsole.java:25)
+	at ServerApplication.main(ServerApplication.java:82)

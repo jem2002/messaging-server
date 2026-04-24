@@ -124,7 +124,7 @@ public class DocumentManager {
     }
 
     public boolean procesarRecepcionDocumento(InputStream redStream, String nombre, long sizeBytes,
-                                              String extension, String mimeType, long ownerUserId, String ownerIp) {
+                                              String extension, String mimeType, long ownerUserId, String ownerIp, String docType) {
         Long docId = null;
         try {
             // 1. Delegar I/O a tu LocalFileManager (Streaming puro al disco)
@@ -140,7 +140,7 @@ public class DocumentManager {
             logger.info("3. Guardando metadatos en MySQL...");
 
             // a) Insertar en tabla documents (Retorna el ID autogenerado)
-            docId = dao.registrarDocumento(nombre, sizeBytes, extension, mimeType, "FILE", originalPath, ownerUserId, ownerIp);
+            docId = dao.registrarDocumento(nombre, sizeBytes, extension, mimeType, docType, originalPath, ownerUserId, ownerIp);
 
             // b) Insertar en tabla document_hashes (Asumimos SHA256 según tu config)
             dao.registrarHashDocumento(docId, "SHA256", cryptoResult.getHashResult());
