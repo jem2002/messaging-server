@@ -16,7 +16,6 @@ public class UDPServer implements Runnable {
     private DatagramSocket datagramSocket;
     private volatile boolean running = false;
     
-    // PUNTO CRÍTICO: Tamaño máximo permitido de payload para UDP según los estándares con IPv4 (65535 - 8(UDP) - 20(IP)) = 65507 bytes
     private static final int MAX_BUFFER_SIZE = 65507;
 
     public UDPServer(int port, ClientConnectionPool connectionPool) {
@@ -42,23 +41,13 @@ public class UDPServer implements Runnable {
             datagramSocket = new DatagramSocket(port);
             logger.info("UDP Server iniciado en el puerto {}", port);
 
-            /*
-             * NOTA DE DISEÑO:
-             * Dado que UDP no garantiza entrega, orden, ni control de congestión,
-             * para archivos grandes (>1GB) la arquitectura exigirá TCP o un
-             * protocolo custom que maneje ACKs (Acknowledgements), retransmisiones
-             * y ensamblado de paquetes sobre UDP (como QUIC o variantes personalizadas).
-             */
             while (running) {
                 try {
                     byte[] buffer = new byte[MAX_BUFFER_SIZE];
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     
-                    // Se bloquea de forma síncrona hasta recibir un datagrama entrante
                     datagramSocket.receive(packet);
                     
-                    // PUNTO CRÍTICO: Despachar a un hilo del pool de procesamiento
-                    // Delegamos a la capa del pool para un procesamiento concurrente rápido
                     connectionPool.dispatchDatagram(packet, datagramSocket);
                     
                 } catch (IOException e) {

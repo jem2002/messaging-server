@@ -1,5 +1,6 @@
 package com.universidad.messaging.server.network;
 
+import com.universidad.messaging.server.business.MessageProcessor;
 import com.universidad.messaging.server.pool.ClientConnectionPool;
 import com.universidad.messaging.server.pool.PooledClientConnection;
 import org.slf4j.Logger;
@@ -15,12 +16,14 @@ public class TCPServer implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(TCPServer.class);
     private final int port;
     private final ClientConnectionPool connectionPool;
+    private final MessageProcessor messageProcessor;
     private ServerSocket serverSocket;
     private volatile boolean running = false;
 
-    public TCPServer(int port, ClientConnectionPool connectionPool) {
+    public TCPServer(int port, ClientConnectionPool connectionPool, MessageProcessor messageProcessor) {
         this.port = port;
         this.connectionPool = connectionPool;
+        this.messageProcessor = messageProcessor;
     }
 
     public void start() {
@@ -47,23 +50,18 @@ public class TCPServer implements Runnable {
 
             while (running) {
                 try {
-                    // PUNTO CRÍTICO DE ARQUITECTURA: accept() es bloqueante.
                     Socket clientSocket = serverSocket.accept();
                     logger.debug("Nueva conexión TCP entrante desde {}", clientSocket.getRemoteSocketAddress());
                     
-                    // 1. Adquirir una conexión pooleable (fail-fast, no bloqueante)
                     PooledClientConnection connection = connectionPool.acquire();
                     
                     if (connection == null) {
-                        // Pool agotado → rechazar con JSON de error
                         logger.warn("Pool de conexiones lleno. Rechazando conexión de {}", clientSocket.getRemoteSocketAddress());
                         rejectConnection(clientSocket);
                     } else {
-                        // 2. Inyectar el socket TCP en la conexión pooleable
                         connection.setSocket(clientSocket);
                         
-                        // 3. Crear el worker y lanzarlo en el ExecutorService del pool
-                        ClientHandler handler = new ClientHandler(connection, connectionPool);
+                        ClientHandler handler = new ClientHandler(connection, connectionPool, messageProcessor);
                         connectionPool.submit(handler);
                         
                         logger.debug("Conexión aceptada y despachada. Pool disponible: {} | Activas: {}",
@@ -87,7 +85,7 @@ public class TCPServer implements Runnable {
     private void rejectConnection(Socket clientSocket) {
         try (Socket socket = clientSocket;
              OutputStream out = socket.getOutputStream()) {
-            String rejectJson = "{\"status\": \"error\", \"message\": \"Servidor sobrecargado. Intente más tarde.\"}";
+            String rejectJson = messageProcessor.generateOverloadRejection();
             out.write(rejectJson.getBytes(StandardCharsets.UTF_8));
             out.flush();
         } catch (IOException e) {

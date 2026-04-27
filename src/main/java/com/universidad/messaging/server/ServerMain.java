@@ -1,16 +1,15 @@
 package com.universidad.messaging.server;
 
+import com.universidad.messaging.server.business.DefaultMessageProcessor;
+import com.universidad.messaging.server.business.MessageProcessor;
+import com.universidad.messaging.server.config.AppConfig;
 import com.universidad.messaging.server.network.TCPServer;
 import com.universidad.messaging.server.network.UDPServer;
 import com.universidad.messaging.server.pool.ClientConnectionPool;
 import com.universidad.messaging.server.repository.pool.DatabaseConnectionManager;
+import com.universidad.messaging.server.storage.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 
 public class ServerMain {
     private static final Logger logger = LoggerFactory.getLogger(ServerMain.class);
@@ -20,38 +19,32 @@ public class ServerMain {
     public static void main(String[] args) {
         logger.info("Iniciando Messaging Server...");
 
-        // 1. Leer configuración
-        Properties config = loadConfiguration();
-        int port = Integer.parseInt(config.getProperty("server.port", "8080"));
+        // 1. Capa de Configuración (Centralizada)
+        AppConfig config = new AppConfig("config.properties");
+        int port = config.getIntProperty("server.port", 8080);
         String protocol = config.getProperty("server.protocol", "TCP").toUpperCase();
+        int maxPoolSize = config.getIntProperty("server.pool.size", 100);
 
-        // 2. Inicializar el Singleton de base de datos
+        // 2. Capa de Infraestructura: Base de Datos y FileSystem
+        DatabaseConnectionManager dbManager = null;
         try {
-            // Llama a getInstance para asegurar que el pool de base de datos se inicializa en el arranque
-            DatabaseConnectionManager dbManager = DatabaseConnectionManager.getInstance();
+            dbManager = new DatabaseConnectionManager(config);
             logger.info("Conexión a la base de datos inicializada correctamente.");
+            
+            StorageService.initDirectories(config.getProperty("storage.dir", "./storage"));
         } catch (Exception e) {
-            logger.error("Error crítico al inicializar la base de datos. Abortando inicio.", e);
+            logger.error("Error crítico al inicializar infraestructura. Abortando inicio.", e);
             System.exit(1);
         }
 
-        // 3. Inicializar los directorios de storage en disco (original y cifrado)
-        try {
-            initStorageDirectories(config);
-            logger.info("Directorios de almacenamiento verificados e inicializados.");
-        } catch (Exception e) {
-            logger.error("Error crítico al inicializar los directorios de disco. Abortando inicio.", e);
-            System.exit(1);
-        }
-
-        // 4. Inicializar el ClientConnectionPool (Object Pool patrón para sockets de clientes)
-        int maxPoolSize = Integer.parseInt(config.getProperty("server.pool.size", "100"));
+        // 3. Capa de Aplicación (Business Logic) y Core
+        MessageProcessor messageProcessor = new DefaultMessageProcessor();
         ClientConnectionPool connectionPool = new ClientConnectionPool(maxPoolSize);
         logger.info("Pool de conexiones inicializado con tamaño máximo: {}", maxPoolSize);
 
-        // 5. Instanciar y arrancar el TCPServer o UDPServer
+        // 4. Capa de Red (Presentación/Transporte)
         if ("TCP".equals(protocol)) {
-            tcpServer = new TCPServer(port, connectionPool);
+            tcpServer = new TCPServer(port, connectionPool, messageProcessor);
             tcpServer.start();
         } else if ("UDP".equals(protocol)) {
             udpServer = new UDPServer(port, connectionPool);
@@ -61,38 +54,8 @@ public class ServerMain {
             System.exit(1);
         }
 
-        // 6. Cierre Limpio (Graceful Shutdown)
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            logger.info("=========================================");
-            logger.info("Iniciando secuencia de apagado seguro (Graceful Shutdown)...");
-            
-            // Detener servidores de red
-            if (tcpServer != null) {
-                tcpServer.stop();
-                logger.info("TCPServer detenido.");
-            }
-            if (udpServer != null) {
-                udpServer.stop();
-                logger.info("UDPServer detenido.");
-            }
-            
-            // Apagar procesadores de requests (pool de sockets)
-            if (connectionPool != null) {
-                connectionPool.shutdown();
-                logger.info("ClientConnectionPool detenido.");
-            }
-            
-            // Cerrar la conexión a base de datos de forma limpia
-            try {
-                DatabaseConnectionManager.getInstance().close();
-                logger.info("Conexión a la base de datos cerrada de forma segura.");
-            } catch (Exception e) {
-                logger.error("Error al cerrar la base de datos durante el apagado", e);
-            }
-            
-            logger.info("Servidor apagado de forma segura.");
-            logger.info("=========================================");
-        }, "Shutdown-Hook-Thread"));
+        // 5. Cierre Limpio (Graceful Shutdown)
+        registerGracefulShutdown(connectionPool, dbManager);
 
         // Prevenir que la app termine prematuramente
         try {
@@ -103,30 +66,36 @@ public class ServerMain {
         }
     }
 
-    private static Properties loadConfiguration() {
-        Properties properties = new Properties();
-        try (InputStream is = ServerMain.class.getClassLoader().getResourceAsStream("config.properties")) {
-            if (is != null) {
-                properties.load(is);
-            } else {
-                logger.warn("Archivo 'config.properties' no encontrado en el classpath. Usando valores por defecto.");
+    private static void registerGracefulShutdown(ClientConnectionPool pool, DatabaseConnectionManager dbManager) {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.info("=========================================");
+            logger.info("Iniciando secuencia de apagado seguro (Graceful Shutdown)...");
+            
+            if (tcpServer != null) {
+                tcpServer.stop();
+                logger.info("TCPServer detenido.");
             }
-        } catch (IOException e) {
-            logger.error("Error al leer 'config.properties'. Usando valores por defecto.", e);
-        }
-        return properties;
-    }
-
-    private static void initStorageDirectories(Properties config) throws IOException {
-        String baseDir = config.getProperty("storage.dir", "./storage");
-        File dirOriginal = new File(baseDir + File.separator + "original");
-        File dirEncrypted = new File(baseDir + File.separator + "encrypted");
-
-        if (!dirOriginal.exists() && !dirOriginal.mkdirs()) {
-            throw new IOException("No se pudo crear el directorio de storage: " + dirOriginal.getAbsolutePath());
-        }
-        if (!dirEncrypted.exists() && !dirEncrypted.mkdirs()) {
-            throw new IOException("No se pudo crear el directorio de storage cifrado: " + dirEncrypted.getAbsolutePath());
-        }
+            if (udpServer != null) {
+                udpServer.stop();
+                logger.info("UDPServer detenido.");
+            }
+            
+            if (pool != null) {
+                pool.shutdown();
+                logger.info("ClientConnectionPool detenido.");
+            }
+            
+            if (dbManager != null) {
+                try {
+                    dbManager.close();
+                    logger.info("Conexión a la base de datos cerrada de forma segura.");
+                } catch (Exception e) {
+                    logger.error("Error al cerrar la base de datos durante el apagado", e);
+                }
+            }
+            
+            logger.info("Servidor apagado de forma segura.");
+            logger.info("=========================================");
+        }, "Shutdown-Hook-Thread"));
     }
 }
