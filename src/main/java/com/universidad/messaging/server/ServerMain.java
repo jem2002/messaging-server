@@ -47,7 +47,7 @@ public class ServerMain {
             tcpServer = new TCPServer(port, connectionPool, messageProcessor);
             tcpServer.start();
         } else if ("UDP".equals(protocol)) {
-            udpServer = new UDPServer(port, connectionPool);
+            udpServer = new UDPServer(port, connectionPool, messageProcessor);
             udpServer.start();
         } else {
             logger.error("Protocolo configurado no está soportado: {}. Use TCP o UDP.", protocol);

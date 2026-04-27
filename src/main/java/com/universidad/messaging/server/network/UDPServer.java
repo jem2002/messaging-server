@@ -1,5 +1,6 @@
 package com.universidad.messaging.server.network;
 
+import com.universidad.messaging.server.business.MessageProcessor;
 import com.universidad.messaging.server.pool.ClientConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +18,12 @@ public class UDPServer implements Runnable {
     private volatile boolean running = false;
     
     private static final int MAX_BUFFER_SIZE = 65507;
+    private final MessageProcessor messageProcessor;
 
-    public UDPServer(int port, ClientConnectionPool connectionPool) {
+    public UDPServer(int port, ClientConnectionPool connectionPool, MessageProcessor messageProcessor) {
         this.port = port;
         this.connectionPool = connectionPool;
+        this.messageProcessor = messageProcessor;
     }
 
     public void start() {
@@ -48,7 +51,7 @@ public class UDPServer implements Runnable {
                     
                     datagramSocket.receive(packet);
                     
-                    connectionPool.dispatchDatagram(packet, datagramSocket);
+                    connectionPool.dispatchDatagram(packet, datagramSocket, messageProcessor);
                     
                 } catch (IOException e) {
                     if (running) {

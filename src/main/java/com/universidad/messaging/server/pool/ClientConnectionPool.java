@@ -149,9 +149,23 @@ public class ClientConnectionPool implements ObjectPool<PooledClientConnection> 
      * @param packet el paquete UDP recibido.
      * @param socket socket para enviar respuestas si es necesario.
      */
-    public void dispatchDatagram(DatagramPacket packet, DatagramSocket socket) {
-        logger.debug("Datagrama recibido de {}:{} (procesamiento UDP pendiente de implementación).",
-                packet.getAddress().getHostAddress(), packet.getPort());
+    public void dispatchDatagram(DatagramPacket packet, DatagramSocket socket, com.universidad.messaging.server.business.MessageProcessor processor) {
+        executor.submit(() -> {
+            try {
+                String clientAddress = packet.getAddress().getHostAddress() + ":" + packet.getPort();
+                String receivedPayload = new String(packet.getData(), 0, packet.getLength(), java.nio.charset.StandardCharsets.UTF_8);
+                logger.debug("Datagrama UDP recibido de {}: {}", clientAddress, receivedPayload);
+                
+                String responseJson = processor.processMessage(clientAddress, receivedPayload);
+                
+                byte[] responseBytes = responseJson.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                DatagramPacket responsePacket = new DatagramPacket(responseBytes, responseBytes.length, packet.getAddress(), packet.getPort());
+                socket.send(responsePacket);
+                logger.debug("Respuesta UDP (ACK) enviada a {}", clientAddress);
+            } catch (Exception e) {
+                logger.error("Error procesando datagrama UDP", e);
+            }
+        });
     }
 
     /**
