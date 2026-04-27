@@ -1,10 +1,10 @@
 import CryptoService.CryptoManager;
 import DocumentService.DocumentManager;
+import EncryptionUtils.EncryptionUtils;
+import EncryptionUtils.IEncryptionUtils;
 import FileSystemStorage.LocalFileManager;
-import FileStorageService.StorageManager;
 import LogService.LogManager;
 import MessageParser.BroadcastManager;
-import MySqlRepository.DatabaseInitializer;
 import MySqlRepository.MySqlDao;
 import RequestRouter.MainRouter;
 import RequestRouter.TransferManager;
@@ -20,18 +20,19 @@ import ch.qos.logback.classic.LoggerContext;
 import pool.ConnectionPoolManager;
 import protocolSelector.ProtocolSelector;
 
+/**
+ * Punto de entrada de la aplicación.
+ * Actúa como Composition Root: instancia y conecta todas las dependencias.
+ *
+ * Principio aplicado: DIP — las dependencias se inyectan via constructor.
+ * Las abstracciones (interfaces) se resuelven aquí en el borde del sistema.
+ */
 public class ServerApplication {
+
     private static final Logger logger = LoggerFactory.getLogger(ServerApplication.class);
 
     public static void main(String[] args) {
-        // Silenciar logs de HikariCP programáticamente
-        try {
-            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-            loggerContext.getLogger("com.zaxxer.hikari").setLevel(Level.WARN);
-            loggerContext.getLogger("com.zaxxer.hikari.pool.HikariPool").setLevel(Level.WARN);
-        } catch (Exception e) {
-            // Si no es logback, ignorar
-        }
+        configurarNivelesDeLog();
 
         logger.info("Arrancando Messaging Server...");
 
@@ -39,23 +40,24 @@ public class ServerApplication {
             // 1. Configuración
             ServerConfig config = new ServerConfig();
 
-            // 2. Módulo Persistencia
-          // DatabaseInitializer.initializeSchema();
+            // 2. Módulo Persistencia (Composition Root resuelve las abstracciones)
             MySqlDao dao = new MySqlDao();
             dao.limpiarConexionesMuertas();
 
-            // 3. Módulo Servicios
-            UserManager userManager = new UserManager(dao);
-            // StorageManager storageManager = new StorageManager();
+            // 3. Módulo Servicios (inyección de interfaces segregadas)
+            UserManager userManager = new UserManager(dao, dao);    // IUserRepository + ISessionRepository
             LocalFileManager fileManager = new LocalFileManager();
-            CryptoManager cryptoManager = new CryptoManager();
-            LogManager logManager = new LogManager(dao);
-            DocumentManager documentManager = new DocumentManager(fileManager, cryptoManager, dao, logManager);
+            IEncryptionUtils encryptionUtils = new EncryptionUtils();
+            CryptoManager cryptoManager = new CryptoManager(encryptionUtils);
+            LogManager logManager = new LogManager(dao);            // IAuditLogRepository
+            DocumentManager documentManager = new DocumentManager(
+                    fileManager, cryptoManager, dao, dao, logManager); // IDocumentRepository + IUserRepository
             BroadcastManager broadcastManager = new BroadcastManager();
             TransferManager transferManager = new TransferManager();
+
             // 4. Módulo Protocolo
-            MainRouter router = new MainRouter(userManager, documentManager, logManager, broadcastManager,
-                    transferManager);
+            MainRouter router = new MainRouter(userManager, documentManager, logManager,
+                    broadcastManager, transferManager);
 
             // 5. Módulo Gestión de Conexiones
             int maxConnections = config.getMaxConnections();
@@ -76,7 +78,7 @@ public class ServerApplication {
                     logManager);
 
             // 7. Interfaces Expuestas y Consola Administrativa
-            ServerAdminAPI adminAPI = new ServerAdminAPI(dao);
+            ServerAdminAPI adminAPI = new ServerAdminAPI(dao, dao);  // IUserRepository + IDocumentRepository
             InteractiveConsole console = new InteractiveConsole(adminAPI, networkServer);
 
             // Arrancamos la consola en el hilo principal
@@ -85,6 +87,16 @@ public class ServerApplication {
         } catch (Exception e) {
             logger.error("Error crítico durante el arranque del servidor.", e);
             System.exit(1);
+        }
+    }
+
+    private static void configurarNivelesDeLog() {
+        try {
+            LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+            loggerContext.getLogger("com.zaxxer.hikari").setLevel(Level.WARN);
+            loggerContext.getLogger("com.zaxxer.hikari.pool.HikariPool").setLevel(Level.WARN);
+        } catch (Exception e) {
+            // Si no es logback, ignorar
         }
     }
 }

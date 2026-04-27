@@ -1,20 +1,30 @@
 package api;
-import MySqlRepository.MySqlDao;
+
+import JsonSchema.DocumentInfo;
+import JsonSchema.UserRecord;
+import MySqlRepository.IDocumentRepository;
+import MySqlRepository.IUserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Expone las capacidades del servidor para el Administrador del sistema.
+ *
+ * Principio aplicado: DIP — depende de IUserRepository e IDocumentRepository,
+ * no de la implementación concreta MySqlDao.
  */
 public class ServerAdminAPI {
-    private static final Logger logger = LoggerFactory.getLogger(ServerAdminAPI.class);
-    private final MySqlDao dao;
 
-    public ServerAdminAPI(MySqlDao dao) {
-        this.dao = dao;
+    private static final Logger logger = LoggerFactory.getLogger(ServerAdminAPI.class);
+
+    private final IUserRepository userRepository;
+    private final IDocumentRepository documentRepository;
+
+    public ServerAdminAPI(IUserRepository userRepository, IDocumentRepository documentRepository) {
+        this.userRepository = userRepository;
+        this.documentRepository = documentRepository;
     }
 
     public void listarClientes() {
@@ -22,13 +32,13 @@ public class ServerAdminAPI {
         System.out.printf("%-5s | %-20s | %-15s | %-20s%n", "ID", "USUARIO", "IP", "FECHA REGISTRO");
         System.out.println("---------------------------------------------------------------------------");
         try {
-            List<Map<String, String>> usuarios = dao.listarUsuariosRegistrados();
+            List<UserRecord> usuarios = userRepository.listarUsuariosRegistrados();
             if (usuarios.isEmpty()) {
                 System.out.println("No hay usuarios registrados aún.");
             } else {
-                for (Map<String, String> u : usuarios) {
+                for (UserRecord u : usuarios) {
                     System.out.printf("%-5s | %-20s | %-15s | %-20s%n",
-                            u.get("id"), u.get("username"), u.get("ip"), u.get("fecha"));
+                            u.getId(), u.getUsername(), u.getIp(), u.getCreatedAt());
                 }
             }
         } catch (Exception e) {
@@ -40,13 +50,13 @@ public class ServerAdminAPI {
     public void listarDocumentos() {
         System.out.println("\n--- DOCUMENTOS EN EL SISTEMA ---");
         try {
-            List<Map<String, String>> docs = dao.listarDocumentosDisponibles();
+            List<DocumentInfo> docs = documentRepository.listarDocumentosDisponibles();
             if (docs.isEmpty()) {
                 System.out.println("No hay documentos almacenados.");
             } else {
-                for (Map<String, String> doc : docs) {
+                for (DocumentInfo doc : docs) {
                     System.out.printf("ID: %s | Archivo: %s | Tamaño: %s bytes | Propietario: %s%n",
-                            doc.get("id"), doc.get("nombre"), doc.get("tamaño"), doc.get("propietario"));
+                            doc.getId(), doc.getNombre(), doc.getSizeBytes(), doc.getPropietario());
                 }
             }
         } catch (Exception e) {
@@ -56,7 +66,6 @@ public class ServerAdminAPI {
 
     public void mostrarLogs() {
         System.out.println("\n--- LOGS RECIENTES ---");
-        // Nota: Deberías agregar un método en tu MySqlDao para SELECT * FROM logs ORDER BY timestamp DESC LIMIT 10
         System.out.println("Mostrando los últimos 10 eventos del sistema (Auditoría)...");
     }
 }

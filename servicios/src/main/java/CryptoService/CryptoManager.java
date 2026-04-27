@@ -1,11 +1,7 @@
 package CryptoService;
 
 import DocumentService.CryptoResult;
-import EncryptionUtils.EncryptionUtils;
 import EncryptionUtils.IEncryptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,18 +17,28 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.UUID;
 
+/**
+ * Servicio de criptografía para cifrado/descifrado y hashing de archivos.
+ *
+ * Principios aplicados:
+ *   - DIP: recibe IEncryptionUtils por constructor (antes creaba new EncryptionUtils() internamente).
+ *   - Clean Code: eliminados imports duplicados, secretKey inicializada de forma segura.
+ */
 public class CryptoManager {
+
     private static final Logger logger = LoggerFactory.getLogger(CryptoManager.class);
 
     private final IEncryptionUtils cryptoUtils;
-    private static SecretKey secretKey;
+    private final SecretKey secretKey;
 
-    public CryptoManager() {
-        this.cryptoUtils = new EncryptionUtils();
+    /**
+     * Constructor con inyección de dependencia.
+     * La llave se genera una sola vez al crear la instancia.
+     */
+    public CryptoManager(IEncryptionUtils cryptoUtils) {
+        this.cryptoUtils = cryptoUtils;
         try {
-            if (secretKey == null) {
-                secretKey = cryptoUtils.generateKey();
-            }
+            this.secretKey = cryptoUtils.generateKey();
         } catch (Exception e) {
             throw new RuntimeException("Error inicializando motor AES desde Shared", e);
         }
@@ -44,11 +50,9 @@ public class CryptoManager {
         MessageDigest digest = cryptoUtils.getHashDigest();
         Cipher cipher = cryptoUtils.getEncryptionCipher(secretKey);
 
-        // Usamos java.nio.file.Path para las rutas
         Path sourcePath = Paths.get(originalPath);
         Path finalEncryptedPath = Paths.get(targetEncryptedDir, UUID.randomUUID().toString() + ".enc");
 
-        // Streaming con NIO (Más rápido y moderno que FileInputStream/FileOutputStream)
         try (InputStream is = Files.newInputStream(sourcePath);
              DigestInputStream dis = new DigestInputStream(is, digest);
              OutputStream os = Files.newOutputStream(finalEncryptedPath);
@@ -70,12 +74,9 @@ public class CryptoManager {
     public void desencriptarYEnviarAlSocket(String encryptedPath, OutputStream networkOut) throws Exception {
         logger.info("Iniciando descifrado y envío (Streaming) para: {}", encryptedPath);
 
-        // Usamos directamente tu secretKey estática
-        Cipher cipher = cryptoUtils.getDecryptionCipher(secretKey); // Modo DECRYPT
-
+        Cipher cipher = cryptoUtils.getDecryptionCipher(secretKey);
         Path sourcePath = Paths.get(encryptedPath);
 
-        // Leemos del disco (encriptado), pasamos por el Cipher, y escribimos a la red (plano)
         try (InputStream is = Files.newInputStream(sourcePath);
              javax.crypto.CipherInputStream cis = new javax.crypto.CipherInputStream(is, cipher)) {
 
@@ -84,7 +85,7 @@ public class CryptoManager {
             while ((bytesRead = cis.read(buffer)) != -1) {
                 networkOut.write(buffer, 0, bytesRead);
             }
-            networkOut.flush(); // Aseguramos que el último bloque salga al cliente
+            networkOut.flush();
         }
         logger.debug("Envío del archivo completado exitosamente.");
     }

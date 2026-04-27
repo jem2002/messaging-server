@@ -8,7 +8,7 @@ public class TransferManager {
     private final Map<String, TransferTicket> pendingTransfers = new ConcurrentHashMap<>();
 
     public void registrarTicket(TransferTicket ticket) {
-        pendingTransfers.put(ticket.token, ticket);
+        pendingTransfers.put(ticket.getToken(), ticket);
     }
 
     public TransferTicket validarYConsumirTicket(String token) {

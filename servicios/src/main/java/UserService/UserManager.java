@@ -1,33 +1,41 @@
 package UserService;
 
-import MySqlRepository.MySqlDao;
+import JsonSchema.ActiveClient;
+import MySqlRepository.ISessionRepository;
+import MySqlRepository.IUserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * Servicio de dominio para la gestión de usuarios.
+ *
+ * Principio aplicado: DIP — depende de IUserRepository e ISessionRepository
+ * (abstracciones), no de MySqlDao (implementación concreta).
+ */
 public class UserManager {
-    // 1. EL LOGGER QUE FALTABA
+
     private static final Logger logger = LoggerFactory.getLogger(UserManager.class);
 
-    private final MySqlDao dao;
+    private final IUserRepository userRepository;
+    private final ISessionRepository sessionRepository;
 
-    public UserManager(MySqlDao dao) {
-        this.dao = dao;
+    public UserManager(IUserRepository userRepository, ISessionRepository sessionRepository) {
+        this.userRepository = userRepository;
+        this.sessionRepository = sessionRepository;
     }
 
     public long conectarUsuario(String username, String ipAddress, int port) throws Exception {
-        long userId = dao.obtenerORegistrarUsuario(username, ipAddress);
-        dao.registrarSesionActiva(userId, ipAddress, port, "TCP");
+        long userId = userRepository.obtenerORegistrarUsuario(username, ipAddress);
+        sessionRepository.registrarSesionActiva(userId, ipAddress, port, "TCP");
         return userId;
     }
 
-    // 2. NUEVO MÉTODO PARA CERRAR LA SESIÓN
     public long desconectarPorCaidaDeRed(String ipAddress, int port) {
         try {
-            long userId = dao.cerrarSesionPorIpYPuerto(ipAddress, port);
+            long userId = sessionRepository.cerrarSesionPorIpYPuerto(ipAddress, port);
             logger.info("Estado actualizado: Sesión cerrada en BD para {}:{} (User ID: {})", ipAddress, port, userId);
             return userId;
         } catch (Exception e) {
@@ -35,20 +43,23 @@ public class UserManager {
             return 0;
         }
     }
-    public List<Map<String, String>> obtenerClientesActivos() {
+
+    public List<ActiveClient> obtenerClientesActivos() {
         try {
-            return dao.listarClientesActivos();
+            return userRepository.listarClientesActivos();
         } catch (Exception e) {
             logger.error("Error al obtener la lista de clientes activos", e);
-            return new ArrayList<>(); // Retorna lista vacía si hay error
+            return new ArrayList<>();
         }
     }
+
     public long obtenerIdUsuario(String username) throws Exception {
-        return dao.obtenerIdUsuarioPorUsername(username);
+        return userRepository.obtenerIdUsuarioPorUsername(username);
     }
+
     public String obtenerNombreUsuario(long userId) {
         try {
-            return dao.obtenerNombreUsuario(userId);
+            return userRepository.obtenerNombreUsuario(userId);
         } catch (Exception e) {
             logger.error("Error al obtener nombre de usuario", e);
             return "UsuarioDesconocido";
